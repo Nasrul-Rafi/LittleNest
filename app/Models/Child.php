@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Child extends Model
 {
@@ -37,6 +38,15 @@ class Child extends Model
             ParentProfile::class,
             'parent_profile_id',
             'parent_profile_id'
+        );
+    }
+
+    public function bookings(): HasMany
+    {
+        return $this->hasMany(
+            Booking::class,
+            'child_id',
+            'child_id'
         );
     }
 }

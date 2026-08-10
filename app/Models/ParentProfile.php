@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class ParentProfile extends Model
 {
@@ -31,6 +32,18 @@ class ParentProfile extends Model
             Child::class,
             'parent_profile_id',
             'parent_profile_id'
+        );
+    }
+
+    public function bookings(): HasManyThrough
+    {
+        return $this->hasManyThrough(
+            Booking::class,
+            Child::class,
+            'parent_profile_id',
+            'child_id',
+            'parent_profile_id',
+            'child_id'
         );
     }
 }
