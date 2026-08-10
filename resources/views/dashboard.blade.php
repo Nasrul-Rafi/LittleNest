@@ -2,15 +2,21 @@
 
 @section('content')
     @php
-        $childCount = auth()->user()
-            ->parentProfile
+        $parentProfile = auth()->user()->parentProfile;
+
+        $childCount = $parentProfile
             ?->children()
+            ->count() ?? 0;
+
+        $bookingCount = $parentProfile
+            ?->bookings()
             ->count() ?? 0;
     @endphp
 
     <div class="page-header">
         <div>
             <h1>Parent Dashboard</h1>
+
             <p>
                 Welcome back, {{ auth()->user()->name }}!
             </p>
@@ -29,9 +35,42 @@
                 Total child profiles connected to your account.
             </p>
 
-            <a class="button" href="{{ route('children.index') }}">
-                Manage Children
-            </a>
+            <div class="action-group">
+                <a
+                    class="button"
+                    href="{{ route('children.index') }}"
+                >
+                    Manage Children
+                </a>
+            </div>
+        </section>
+
+        <section class="panel">
+            <h2>My Bookings</h2>
+
+            <div class="stat-number">
+                {{ $bookingCount }}
+            </div>
+
+            <p class="muted">
+                Total child care bookings submitted by you.
+            </p>
+
+            <div class="action-group">
+                <a
+                    class="button"
+                    href="{{ route('bookings.index') }}"
+                >
+                    View Bookings
+                </a>
+
+                <a
+                    class="button button-secondary"
+                    href="{{ route('bookings.create') }}"
+                >
+                    New Booking
+                </a>
+            </div>
         </section>
 
         <section class="panel">

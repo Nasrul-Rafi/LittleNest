@@ -2,12 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+
     <meta
         name="viewport"
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>{{ $title ?? 'Parent Portal' }} - LittleNest</title>
+    <title>
+        {{ $title ?? 'Parent Portal' }} - LittleNest
+    </title>
 
     <style>
         :root {
@@ -33,10 +36,10 @@
 
         body {
             margin: 0;
-            font-family: Arial, sans-serif;
             color: var(--text);
             background: var(--background);
-            line-height: 1.5;
+            font-family: Arial, Helvetica, sans-serif;
+            line-height: 1.6;
         }
 
         a {
@@ -44,14 +47,15 @@
         }
 
         .topbar {
-            background: var(--surface);
-            border-bottom: 1px solid var(--border);
+            color: white;
+            background: var(--primary);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
         }
 
         .topbar-inner {
             width: min(1120px, 92%);
             min-height: 70px;
-            margin: auto;
+            margin: 0 auto;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -59,7 +63,7 @@
         }
 
         .brand {
-            color: var(--primary);
+            color: white;
             font-size: 24px;
             font-weight: 700;
             text-decoration: none;
@@ -68,49 +72,43 @@
         .navigation {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
         }
 
-        .navigation a {
-            padding: 10px 14px;
-            color: var(--muted);
-            font-weight: 600;
+        .navigation a,
+        .navigation button {
+            padding: 9px 14px;
+            color: white;
+            background: transparent;
+            border: 0;
+            border-radius: 7px;
+            font: inherit;
+            cursor: pointer;
             text-decoration: none;
-            border-radius: 8px;
         }
 
         .navigation a:hover,
+        .navigation button:hover,
         .navigation a.active {
-            color: var(--primary);
-            background: #eeebff;
+            background: rgba(255, 255, 255, 0.18);
         }
 
-        .logout-button {
-            padding: 10px 14px;
-            color: var(--danger);
-            background: transparent;
-            border: 0;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .logout-button:hover {
-            background: #fff0f0;
+        .navigation form {
+            margin: 0;
         }
 
         .container {
             width: min(1120px, 92%);
+            min-height: calc(100vh - 140px);
             margin: 32px auto;
         }
 
         .page-header {
             margin-bottom: 24px;
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             justify-content: space-between;
-            gap: 16px;
+            gap: 20px;
         }
 
         .page-header h1 {
@@ -125,10 +123,35 @@
 
         .panel {
             padding: 24px;
+            margin-bottom: 24px;
             background: var(--surface);
             border: 1px solid var(--border);
-            border-radius: 14px;
-            box-shadow: 0 6px 20px rgba(45, 52, 54, 0.06);
+            border-radius: 12px;
+            box-shadow: 0 4px 18px rgba(45, 52, 54, 0.05);
+        }
+
+        .panel h2 {
+            margin-top: 0;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(
+                auto-fit,
+                minmax(280px, 1fr)
+            );
+            gap: 20px;
+        }
+
+        .stat-number {
+            margin: 10px 0;
+            color: var(--primary);
+            font-size: 42px;
+            font-weight: 700;
+        }
+
+        .muted {
+            color: var(--muted);
         }
 
         .button {
@@ -138,58 +161,83 @@
             background: var(--primary);
             border: 1px solid var(--primary);
             border-radius: 8px;
-            font-size: 14px;
+            font: inherit;
             font-weight: 600;
-            text-decoration: none;
             cursor: pointer;
+            text-align: center;
+            text-decoration: none;
         }
 
         .button:hover {
             background: var(--primary-dark);
+            border-color: var(--primary-dark);
         }
 
         .button-secondary {
             color: var(--primary);
             background: white;
+            border-color: var(--primary);
         }
 
         .button-secondary:hover {
             color: white;
+            background: var(--primary);
         }
 
         .button-danger {
+            color: white;
             background: var(--danger);
             border-color: var(--danger);
         }
 
         .button-danger:hover {
-            background: #b02525;
+            background: #b02526;
+            border-color: #b02526;
         }
 
         .button-small {
             padding: 7px 11px;
-            font-size: 13px;
+            font-size: 14px;
+        }
+
+        .action-group,
+        .form-actions {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .action-group form,
+        .form-actions form {
+            margin: 0;
+        }
+
+        .form-actions {
+            margin-top: 24px;
         }
 
         .alert {
-            margin-bottom: 20px;
             padding: 14px 16px;
+            margin-bottom: 20px;
             border-radius: 8px;
         }
 
         .alert-success {
             color: var(--success-text);
             background: var(--success-bg);
+            border: 1px solid #b7ead8;
         }
 
         .alert-error {
             color: var(--error-text);
             background: var(--error-bg);
+            border: 1px solid #ffc9c9;
         }
 
         .alert ul {
             margin: 8px 0 0;
-            padding-left: 20px;
+            padding-left: 22px;
         }
 
         .form-grid {
@@ -208,7 +256,7 @@
             grid-column: 1 / -1;
         }
 
-        label {
+        .form-group label {
             font-weight: 600;
         }
 
@@ -228,28 +276,16 @@
         select:focus,
         textarea:focus {
             border-color: var(--primary);
-            outline: 3px solid #eeebff;
+            outline: 2px solid rgba(108, 92, 231, 0.15);
         }
 
         textarea {
-            min-height: 110px;
+            min-height: 120px;
             resize: vertical;
         }
 
         .required {
             color: var(--danger);
-        }
-
-        .form-actions,
-        .action-group {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .form-actions {
-            margin-top: 24px;
         }
 
         .table-wrap {
@@ -263,23 +299,27 @@
 
         th,
         td {
-            padding: 14px 12px;
-            text-align: left;
+            padding: 13px 12px;
             border-bottom: 1px solid var(--border);
+            text-align: left;
+            vertical-align: middle;
         }
 
         th {
             color: var(--muted);
             background: #fafafa;
-            font-size: 13px;
-            text-transform: uppercase;
+            font-size: 14px;
+        }
+
+        tbody tr:hover {
+            background: #fafaff;
         }
 
         .badge {
             display: inline-block;
             padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 12px;
+            border-radius: 999px;
+            font-size: 13px;
             font-weight: 700;
             text-transform: capitalize;
         }
@@ -290,12 +330,32 @@
         }
 
         .badge-inactive {
-            color: #b25f00;
+            color: #636e72;
+            background: #eceff1;
+        }
+
+        .badge-pending {
+            color: #8a5d00;
             background: #fff3bf;
         }
 
+        .badge-confirmed {
+            color: #1c4f91;
+            background: #dbeafe;
+        }
+
+        .badge-completed {
+            color: #087f5b;
+            background: #dff7ed;
+        }
+
+        .badge-cancelled {
+            color: #c92a2a;
+            background: #ffe3e3;
+        }
+
         .empty-state {
-            padding: 45px 20px;
+            padding: 34px 20px;
             text-align: center;
         }
 
@@ -304,21 +364,21 @@
         }
 
         .empty-state p {
-            margin-bottom: 22px;
+            margin-bottom: 18px;
             color: var(--muted);
         }
 
         .detail-grid {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 18px;
+            gap: 20px;
         }
 
         .detail-item {
             padding: 16px;
             background: #fafafa;
             border: 1px solid var(--border);
-            border-radius: 10px;
+            border-radius: 9px;
         }
 
         .detail-item-full {
@@ -327,51 +387,30 @@
 
         .detail-label {
             display: block;
-            margin-bottom: 6px;
+            margin-bottom: 5px;
             color: var(--muted);
-            font-size: 13px;
-            font-weight: 700;
-            text-transform: uppercase;
+            font-size: 14px;
+            font-weight: 600;
         }
 
         .detail-value {
             margin: 0;
-            white-space: pre-wrap;
-        }
-
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 20px;
-        }
-
-        .stat-number {
-            margin: 8px 0;
-            color: var(--primary);
-            font-size: 36px;
-            font-weight: 700;
-        }
-
-        .muted {
-            color: var(--muted);
+            font-weight: 600;
         }
 
         .footer {
-            padding: 20px;
+            padding: 22px;
             color: var(--muted);
+            background: white;
+            border-top: 1px solid var(--border);
             text-align: center;
-            font-size: 13px;
         }
 
-        @media (max-width: 700px) {
-            .topbar-inner,
-            .page-header {
+        @media (max-width: 768px) {
+            .topbar-inner {
+                padding: 14px 0;
                 align-items: flex-start;
                 flex-direction: column;
-            }
-
-            .topbar-inner {
-                padding: 16px 0;
             }
 
             .navigation {
@@ -379,9 +418,12 @@
                 flex-wrap: wrap;
             }
 
+            .page-header {
+                flex-direction: column;
+            }
+
             .form-grid,
-            .detail-grid,
-            .dashboard-grid {
+            .detail-grid {
                 grid-template-columns: 1fr;
             }
 
@@ -389,9 +431,14 @@
             .detail-item-full {
                 grid-column: auto;
             }
+
+            .panel {
+                padding: 18px;
+            }
         }
     </style>
 </head>
+
 <body>
     <header class="topbar">
         <div class="topbar-inner">
@@ -402,7 +449,9 @@
             <nav class="navigation">
                 <a
                     href="{{ route('dashboard') }}"
-                    class="{{ request()->routeIs('dashboard') ? 'active' : '' }}"
+                    class="{{ request()->routeIs('dashboard')
+                        ? 'active'
+                        : '' }}"
                 >
                     Dashboard
                 </a>
@@ -410,16 +459,27 @@
                 @if (auth()->user()->role === 'parent')
                     <a
                         href="{{ route('children.index') }}"
-                        class="{{ request()->routeIs('children.*') ? 'active' : '' }}"
+                        class="{{ request()->routeIs('children.*')
+                            ? 'active'
+                            : '' }}"
                     >
                         My Children
+                    </a>
+
+                    <a
+                        href="{{ route('bookings.index') }}"
+                        class="{{ request()->routeIs('bookings.*')
+                            ? 'active'
+                            : '' }}"
+                    >
+                        My Bookings
                     </a>
                 @endif
 
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
 
-                    <button class="logout-button" type="submit">
+                    <button type="submit">
                         Logout
                     </button>
                 </form>
@@ -434,11 +494,31 @@
             </div>
         @endif
 
+        @if (session('error'))
+            <div class="alert alert-error">
+                {{ session('error') }}
+            </div>
+        @endif
+
+        @if ($errors->any())
+            <div class="alert alert-error">
+                <strong>
+                    Please correct the following information:
+                </strong>
+
+                <ul>
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
         @yield('content')
     </main>
 
     <footer class="footer">
-        &copy; {{ date('Y') }} LittleNest Child Care System
+        &copy; {{ date('Y') }} LittleNest. All rights reserved.
     </footer>
 </body>
 </html>

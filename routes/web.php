@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BookingController;
 use App\Http\Controllers\ChildController;
 use Illuminate\Support\Facades\Route;
 
@@ -28,6 +29,19 @@ Route::middleware('auth')->group(function () {
     })->name('dashboard');
 
     Route::resource('children', ChildController::class);
+
+    Route::patch(
+        '/bookings/{booking}/cancel',
+        [BookingController::class, 'cancel']
+    )->name('bookings.cancel');
+
+    Route::resource('bookings', BookingController::class)
+        ->only([
+            'index',
+            'create',
+            'store',
+            'show',
+        ]);
 
     Route::post('/logout', [AuthController::class, 'logout'])
         ->name('logout');
