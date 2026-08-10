@@ -1,24 +1,56 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - LittleNest</title>
-</head>
-<body>
-    <h1>LittleNest Parent Dashboard</h1>
+@extends('layouts.parent')
 
-    @if (session('success'))
-        <p>{{ session('success') }}</p>
-    @endif
+@section('content')
+    @php
+        $childCount = auth()->user()
+            ->parentProfile
+            ?->children()
+            ->count() ?? 0;
+    @endphp
 
-    <p>Welcome, {{ auth()->user()->name }}!</p>
-    <p>Email: {{ auth()->user()->email }}</p>
-    <p>Role: {{ ucfirst(auth()->user()->role) }}</p>
+    <div class="page-header">
+        <div>
+            <h1>Parent Dashboard</h1>
+            <p>
+                Welcome back, {{ auth()->user()->name }}!
+            </p>
+        </div>
+    </div>
 
-    <form method="POST" action="{{ route('logout') }}">
-        @csrf
-        <button type="submit">Logout</button>
-    </form>
-</body>
-</html>
+    <div class="dashboard-grid">
+        <section class="panel">
+            <h2>My Children</h2>
+
+            <div class="stat-number">
+                {{ $childCount }}
+            </div>
+
+            <p class="muted">
+                Total child profiles connected to your account.
+            </p>
+
+            <a class="button" href="{{ route('children.index') }}">
+                Manage Children
+            </a>
+        </section>
+
+        <section class="panel">
+            <h2>Parent Account</h2>
+
+            <p>
+                <strong>Name:</strong>
+                {{ auth()->user()->name }}
+            </p>
+
+            <p>
+                <strong>Email:</strong>
+                {{ auth()->user()->email }}
+            </p>
+
+            <p>
+                <strong>Role:</strong>
+                {{ ucfirst(auth()->user()->role) }}
+            </p>
+        </section>
+    </div>
+@endsection
