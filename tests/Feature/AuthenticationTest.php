@@ -33,6 +33,14 @@ class AuthenticationTest extends TestCase
         $this->assertNotNull($user);
         $this->assertSame('parent', $user->role);
 
+        $this->assertDatabaseHas('parent_profiles', [
+            'user_id' => $user->id,
+        ]);
+
+        $this->assertNotNull(
+            $user->fresh()->parentProfile
+        );
+
         $this->assertTrue(
             Hash::check('password123', $user->password)
         );

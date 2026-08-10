@@ -26,13 +26,13 @@ class AuthController extends Controller
                 'string',
                 'email',
                 'max:255',
-                'unique:users,email'
+                'unique:users,email',
             ],
             'password' => [
                 'required',
                 'string',
                 'min:8',
-                'confirmed'
+                'confirmed',
             ],
         ]);
 
@@ -40,7 +40,10 @@ class AuthController extends Controller
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
+            'role' => 'parent',
         ]);
+
+        $user->parentProfile()->create();
 
         Auth::login($user);
         $request->session()->regenerate();
