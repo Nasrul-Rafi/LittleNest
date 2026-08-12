@@ -24,6 +24,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'status',
     ];
 
     /**
@@ -53,6 +54,15 @@ class User extends Authenticatable
     {
         return $this->hasOne(
             ParentProfile::class,
+            'user_id',
+            'id'
+        );
+    }
+
+    public function caregiverProfile(): HasOne
+    {
+        return $this->hasOne(
+            CaregiverProfile::class,
             'user_id',
             'id'
         );

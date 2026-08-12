@@ -1,6 +1,70 @@
 @extends('layouts.parent')
 
 @section('content')
+    @if (auth()->user()->role === 'caregiver')
+        @php
+            $caregiverProfile = auth()->user()->caregiverProfile;
+        @endphp
+
+        <div class="page-header">
+            <div>
+                <h1>Caregiver Dashboard</h1>
+
+                <p>
+                    Welcome back, {{ auth()->user()->name }}!
+                </p>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            <section class="panel">
+                <h2>Account Status</h2>
+
+                <p>
+                    <span class="badge badge-{{ auth()->user()->status }}">
+                        {{ auth()->user()->status }}
+                    </span>
+                </p>
+
+                <p class="muted">
+                    Your caregiver login account is active.
+                </p>
+            </section>
+
+            <section class="panel">
+                <h2>Professional Profile</h2>
+
+                <p>
+                    <strong>Qualification:</strong>
+                    {{ $caregiverProfile->qualification }}
+                </p>
+
+                <p>
+                    <strong>Experience:</strong>
+                    {{ $caregiverProfile->experience_years }} years
+                </p>
+
+                <p>
+                    <strong>Specialization:</strong>
+                    {{ $caregiverProfile->specialization ?: 'Not provided' }}
+                </p>
+            </section>
+
+            <section class="panel">
+                <h2>Availability</h2>
+
+                <p>
+                    <span class="badge badge-{{ $caregiverProfile->availability_status }}">
+                        {{ $caregiverProfile->availability_status }}
+                    </span>
+                </p>
+
+                <p class="muted">
+                    Assigned children and schedules will appear here after the assignment feature is added.
+                </p>
+            </section>
+        </div>
+    @else
     @php
         $parentProfile = auth()->user()->parentProfile;
 
@@ -92,4 +156,5 @@
             </p>
         </section>
     </div>
+    @endif
 @endsection

@@ -8,9 +8,7 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>
-        {{ $title ?? 'Parent Portal' }} - LittleNest
-    </title>
+    <title>{{ $title ?? 'LittleNest Portal' }}</title>
 
     <style>
         :root {
@@ -334,6 +332,16 @@
             background: #eceff1;
         }
 
+        .badge-available {
+            color: #087f5b;
+            background: #dff7ed;
+        }
+
+        .badge-unavailable {
+            color: #8a5d00;
+            background: #fff3bf;
+        }
+
         .badge-pending {
             color: #8a5d00;
             background: #fff3bf;
@@ -473,6 +481,24 @@
                             : '' }}"
                     >
                         My Bookings
+                    </a>
+                @elseif (auth()->user()->role === 'admin')
+                    <a
+                        href="{{ route('admin.bookings.index') }}"
+                        class="{{ request()->routeIs('admin.bookings.*')
+                            ? 'active'
+                            : '' }}"
+                    >
+                        Booking Management
+                    </a>
+
+                    <a
+                        href="{{ route('admin.caregivers.index') }}"
+                        class="{{ request()->routeIs('admin.caregivers.*')
+                            ? 'active'
+                            : '' }}"
+                    >
+                        Caregiver Management
                     </a>
                 @endif
 
