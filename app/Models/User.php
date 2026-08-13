@@ -6,6 +6,7 @@ namespace App\Models;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -64,6 +65,15 @@ class User extends Authenticatable
         return $this->hasOne(
             CaregiverProfile::class,
             'user_id',
+            'id'
+        );
+    }
+
+    public function caregiverAssignments(): HasMany
+    {
+        return $this->hasMany(
+            CaregiverAssignment::class,
+            'caregiver_id',
             'id'
         );
     }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Booking;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class AdminBookingController extends Controller
@@ -16,6 +17,7 @@ class AdminBookingController extends Controller
         $bookings = Booking::with([
             'child.parentProfile.user',
             'service',
+            'caregiverAssignment.caregiver',
         ])
             ->orderBy('booking_date', 'desc')
             ->get();
@@ -29,7 +31,26 @@ class AdminBookingController extends Controller
             abort(403);
         }
 
-        return view('admin.bookings.show', compact('booking'));
+        $booking->load([
+            'child.parentProfile.user',
+            'service',
+            'caregiverAssignment.caregiver',
+            'caregiverAssignment.activities',
+        ]);
+
+        $caregivers = User::where('role', 'caregiver')
+            ->where('status', 'active')
+            ->whereHas('caregiverProfile', function ($query) {
+                $query->where('availability_status', 'available');
+            })
+            ->with('caregiverProfile')
+            ->orderBy('name')
+            ->get();
+
+        return view(
+            'admin.bookings.show',
+            compact('booking', 'caregivers')
+        );
     }
 
     public function confirm(Request $request, Booking $booking)
@@ -48,5 +69,73 @@ class AdminBookingController extends Controller
         return redirect()
             ->route('admin.bookings.show', $booking)
             ->with('success', 'Booking confirmed successfully.');
+    }
+
+    public function assignCaregiver(Request $request, Booking $booking)
+    {
+        if ($request->user()->role !== 'admin') {
+            abort(403);
+        }
+
+        if ($booking->status !== 'confirmed') {
+            return back()->with(
+                'error',
+                'Only confirmed bookings can receive a caregiver.'
+            );
+        }
+
+        $validated = $request->validate([
+            'caregiver_id' => ['required', 'integer', 'exists:users,id'],
+        ]);
+
+        $caregiver = User::whereKey($validated['caregiver_id'])
+            ->where('role', 'caregiver')
+            ->where('status', 'active')
+            ->whereHas('caregiverProfile', function ($query) {
+                $query->where('availability_status', 'available');
+            })
+            ->first();
+
+        if (!$caregiver) {
+            return back()->with(
+                'error',
+                'Please select an active and available caregiver.'
+            );
+        }
+
+        $assignment = $booking->caregiverAssignment;
+
+        if ($assignment) {
+            if (
+                $assignment->caregiver_id !== $caregiver->id
+                && $assignment->activities()->exists()
+            ) {
+                return back()->with(
+                    'error',
+                    'This caregiver cannot be changed because activity updates already exist.'
+                );
+            }
+
+            $assignment->caregiver_id = $caregiver->id;
+            $assignment->assigned_by = $request->user()->id;
+            $assignment->assigned_at = now();
+            $assignment->status = 'assigned';
+            $assignment->save();
+
+            $message = 'Caregiver reassigned successfully.';
+        } else {
+            $booking->caregiverAssignment()->create([
+                'caregiver_id' => $caregiver->id,
+                'assigned_by' => $request->user()->id,
+                'assigned_at' => now(),
+                'status' => 'assigned',
+            ]);
+
+            $message = 'Caregiver assigned successfully.';
+        }
+
+        return redirect()
+            ->route('admin.bookings.show', $booking)
+            ->with('success', $message);
     }
 }

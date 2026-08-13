@@ -362,6 +362,26 @@
             background: #ffe3e3;
         }
 
+        .badge-paid {
+            color: #087f5b;
+            background: #dff7ed;
+        }
+
+        .badge-failed {
+            color: #c92a2a;
+            background: #ffe3e3;
+        }
+
+        .badge-approved {
+            color: #087f5b;
+            background: #dff7ed;
+        }
+
+        .badge-rejected {
+            color: #c92a2a;
+            background: #ffe3e3;
+        }
+
         .empty-state {
             padding: 34px 20px;
             text-align: center;
@@ -404,6 +424,29 @@
         .detail-value {
             margin: 0;
             font-weight: 600;
+        }
+
+        .activity-list {
+            display: grid;
+            gap: 14px;
+        }
+
+        .activity-item {
+            padding: 16px;
+            background: #fafafa;
+            border: 1px solid var(--border);
+            border-radius: 9px;
+        }
+
+        .activity-item p {
+            margin: 8px 0 0;
+        }
+
+        .activity-photo {
+            display: block;
+            width: min(320px, 100%);
+            margin-top: 12px;
+            border-radius: 9px;
         }
 
         .footer {
@@ -457,7 +500,7 @@
             <nav class="navigation">
                 <a
                     href="{{ route('dashboard') }}"
-                    class="{{ request()->routeIs('dashboard')
+                    class="{{ request()->routeIs('dashboard', 'admin.dashboard')
                         ? 'active'
                         : '' }}"
                 >
@@ -476,11 +519,57 @@
 
                     <a
                         href="{{ route('bookings.index') }}"
-                        class="{{ request()->routeIs('bookings.*')
+                        class="{{ request()->routeIs(
+                            'bookings.*',
+                            'booking-requests.*'
+                        )
                             ? 'active'
                             : '' }}"
                     >
                         My Bookings
+                    </a>
+
+                    <a
+                        href="{{ route('profile.show') }}"
+                        class="{{ request()->routeIs('profile.*')
+                            ? 'active'
+                            : '' }}"
+                    >
+                        My Profile
+                    </a>
+                @elseif (auth()->user()->role === 'caregiver')
+                    <a
+                        href="{{ route('caregiver.assignments.index') }}"
+                        class="{{ request()->routeIs(
+                            'caregiver.assignments.*',
+                            'caregiver.activities.*'
+                        )
+                            ? 'active'
+                            : '' }}"
+                    >
+                        My Assignments
+                    </a>
+
+                    <a
+                        href="{{ route('caregiver.schedule.index') }}"
+                        class="{{ request()->routeIs(
+                            'caregiver.schedule.*'
+                        )
+                            ? 'active'
+                            : '' }}"
+                    >
+                        My Schedule
+                    </a>
+
+                    <a
+                        href="{{ route('caregiver.profile.show') }}"
+                        class="{{ request()->routeIs(
+                            'caregiver.profile.*'
+                        )
+                            ? 'active'
+                            : '' }}"
+                    >
+                        My Profile
                     </a>
                 @elseif (auth()->user()->role === 'admin')
                     <a
@@ -499,6 +588,35 @@
                             : '' }}"
                     >
                         Caregiver Management
+                    </a>
+
+                    <a
+                        href="{{ route('admin.booking-requests.index') }}"
+                        class="{{ request()->routeIs(
+                            'admin.booking-requests.*'
+                        )
+                            ? 'active'
+                            : '' }}"
+                    >
+                        Booking Requests
+                    </a>
+
+                    <a
+                        href="{{ route('admin.payments.index') }}"
+                        class="{{ request()->routeIs('admin.payments.*')
+                            ? 'active'
+                            : '' }}"
+                    >
+                        Payment Management
+                    </a>
+
+                    <a
+                        href="{{ route('admin.services.index') }}"
+                        class="{{ request()->routeIs('admin.services.*')
+                            ? 'active'
+                            : '' }}"
+                    >
+                        Service Management
                     </a>
                 @endif
 

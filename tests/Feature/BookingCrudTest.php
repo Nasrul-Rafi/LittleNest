@@ -313,6 +313,30 @@ class BookingCrudTest extends TestCase
         ]);
     }
 
+    public function test_confirmed_booking_requires_cancellation_request(): void
+    {
+        [$parent, $child] =
+            $this->createParentWithChild();
+
+        $service = $this->createService();
+
+        $booking = $this->createBooking(
+            $child,
+            $service,
+            'confirmed'
+        );
+
+        $this->actingAs($parent)
+            ->patch(route('bookings.cancel', $booking))
+            ->assertRedirect(route('bookings.show', $booking))
+            ->assertSessionHas('error');
+
+        $this->assertDatabaseHas('bookings', [
+            'booking_id' => $booking->booking_id,
+            'status' => 'confirmed',
+        ]);
+    }
+
     private function createParentWithChild(
         string $childName = 'Test Child'
     ): array {

@@ -1,0 +1,65 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\CaregiverAssignment;
+use Illuminate\Http\Request;
+
+class CaregiverAssignmentController extends Controller
+{
+    public function index(Request $request)
+    {
+        if (
+            $request->user()->role !== 'caregiver'
+            || $request->user()->status !== 'active'
+        ) {
+            abort(403);
+        }
+
+        $assignments = CaregiverAssignment::where(
+            'caregiver_id',
+            $request->user()->id
+        )
+            ->with([
+                'booking.child',
+                'booking.service',
+            ])
+            ->orderBy('assigned_at', 'desc')
+            ->get();
+
+        return view(
+            'caregiver.assignments.index',
+            compact('assignments')
+        );
+    }
+
+    public function show(
+        Request $request,
+        CaregiverAssignment $assignment
+    ) {
+        if (
+            $request->user()->role !== 'caregiver'
+            || $request->user()->status !== 'active'
+        ) {
+            abort(403);
+        }
+
+        if ($assignment->caregiver_id !== $request->user()->id) {
+            abort(403);
+        }
+
+        $assignment->load([
+            'booking.child',
+            'booking.service',
+        ]);
+
+        $activities = $assignment->activities()
+            ->orderBy('activity_time', 'desc')
+            ->get();
+
+        return view(
+            'caregiver.assignments.show',
+            compact('assignment', 'activities')
+        );
+    }
+}

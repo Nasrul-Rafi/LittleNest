@@ -29,6 +29,7 @@
                             <th>Parent</th>
                             <th>Child</th>
                             <th>Service</th>
+                            <th>Caregiver</th>
                             <th>Date and Time</th>
                             <th>Status</th>
                             <th>Actions</th>
@@ -42,6 +43,11 @@
                                 <td>{{ $booking->child->parentProfile->user->name }}</td>
                                 <td><strong>{{ $booking->child->full_name }}</strong></td>
                                 <td>{{ $booking->service->name }}</td>
+
+                                <td>
+                                    {{ $booking->caregiverAssignment?->caregiver?->name
+                                        ?? 'Not assigned' }}
+                                </td>
 
                                 <td>
                                     {{ $booking->booking_date->format('d M Y') }}

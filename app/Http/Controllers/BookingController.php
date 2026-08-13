@@ -134,9 +134,38 @@ class BookingController extends Controller
         $parentProfile = $this->getParentProfile($request);
         $this->ensureOwnership($booking, $parentProfile);
 
-        $booking->load(['child', 'service']);
+        $booking->load([
+            'child',
+            'service',
+            'caregiverAssignment.caregiver',
+            'caregiverAssignment.activities',
+            'bookingRequests.reviewer',
+        ]);
 
-        return view('bookings.show', compact('booking'));
+        $payments = $booking->payments()
+            ->latest('payment_id')
+            ->get();
+
+        $latestPayment = $payments->first();
+
+        $bookingRequests = $booking->bookingRequests
+            ->sortByDesc('request_id');
+
+        $pendingRequest = $bookingRequests->firstWhere(
+            'request_status',
+            'pending'
+        );
+
+        return view(
+            'bookings.show',
+            compact(
+                'booking',
+                'payments',
+                'latestPayment',
+                'bookingRequests',
+                'pendingRequest'
+            )
+        );
     }
 
     public function cancel(
@@ -146,11 +175,29 @@ class BookingController extends Controller
         $parentProfile = $this->getParentProfile($request);
         $this->ensureOwnership($booking, $parentProfile);
 
-        if (!in_array(
-            $booking->status,
-            ['pending', 'confirmed'],
-            true
-        )) {
+        $hasPaidPayment = $booking->payments()
+            ->where('payment_status', 'paid')
+            ->exists();
+
+        if ($hasPaidPayment) {
+            return redirect()
+                ->route('bookings.show', $booking)
+                ->with(
+                    'error',
+                    'A paid booking cannot be cancelled directly.'
+                );
+        }
+
+        if ($booking->status === 'confirmed') {
+            return redirect()
+                ->route('bookings.show', $booking)
+                ->with(
+                    'error',
+                    'Please submit a cancellation request for a confirmed booking.'
+                );
+        }
+
+        if ($booking->status !== 'pending') {
             return redirect()
                 ->route('bookings.show', $booking)
                 ->with(

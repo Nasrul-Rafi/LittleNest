@@ -110,4 +110,136 @@
             </div>
         @endif
     </section>
+
+    <section class="panel">
+        <h2>Caregiver Assignment</h2>
+
+        @if ($booking->caregiverAssignment)
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <span class="detail-label">Assigned Caregiver</span>
+
+                    <p class="detail-value">
+                        {{ $booking->caregiverAssignment->caregiver->name }}
+                    </p>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">Caregiver Email</span>
+
+                    <p class="detail-value">
+                        {{ $booking->caregiverAssignment->caregiver->email }}
+                    </p>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">Assigned At</span>
+
+                    <p class="detail-value">
+                        {{ $booking->caregiverAssignment->assigned_at->format('d M Y, h:i A') }}
+                    </p>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">Assignment Status</span>
+
+                    <p class="detail-value">
+                        <span class="badge badge-active">
+                            {{ $booking->caregiverAssignment->status }}
+                        </span>
+                    </p>
+                </div>
+            </div>
+        @else
+            <p class="muted">No caregiver has been assigned yet.</p>
+        @endif
+
+        @if ($booking->status === 'confirmed')
+            @if ($caregivers->isEmpty())
+                <p class="alert alert-error">
+                    No active and available caregiver is currently available.
+                </p>
+            @else
+                <form
+                    method="POST"
+                    action="{{ route('admin.bookings.assign-caregiver', $booking) }}"
+                >
+                    @csrf
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="caregiver_id">
+                                {{ $booking->caregiverAssignment
+                                    ? 'Reassign Caregiver'
+                                    : 'Select Caregiver' }}
+                                <span class="required">*</span>
+                            </label>
+
+                            <select id="caregiver_id" name="caregiver_id" required>
+                                <option value="">Choose a caregiver</option>
+
+                                @foreach ($caregivers as $caregiver)
+                                    <option
+                                        value="{{ $caregiver->id }}"
+                                        @selected(old('caregiver_id') == $caregiver->id)
+                                    >
+                                        {{ $caregiver->name }}
+                                        — {{ $caregiver->caregiverProfile->specialization ?: 'General Care' }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button class="button" type="submit">
+                            {{ $booking->caregiverAssignment
+                                ? 'Change Caregiver'
+                                : 'Assign Caregiver' }}
+                        </button>
+                    </div>
+                </form>
+            @endif
+        @elseif ($booking->status === 'pending')
+            <p class="muted">
+                Confirm this booking before assigning a caregiver.
+            </p>
+        @endif
+    </section>
+
+    @if ($booking->caregiverAssignment)
+        <section class="panel">
+            <h2>Activity Updates</h2>
+
+            @if ($booking->caregiverAssignment->activities->isEmpty())
+                <p class="muted">No activity update has been added yet.</p>
+            @else
+                <div class="activity-list">
+                    @foreach ($booking->caregiverAssignment->activities->sortByDesc('activity_time') as $activity)
+                        <article class="activity-item">
+                            <div>
+                                <strong>
+                                    {{ ucwords(str_replace('-', ' ', $activity->activity_type)) }}
+                                </strong>
+
+                                <span class="muted">
+                                    — {{ $activity->activity_time->format('d M Y, h:i A') }}
+                                </span>
+                            </div>
+
+                            <p>{{ $activity->details ?: 'No additional details.' }}</p>
+
+                            @if ($activity->photo_path)
+                                <img
+                                    class="activity-photo"
+                                    src="{{ asset('storage/' . $activity->photo_path) }}"
+                                    alt="Activity photo"
+                                >
+                            @endif
+                        </article>
+                    @endforeach
+                </div>
+            @endif
+        </section>
+    @endif
 @endsection

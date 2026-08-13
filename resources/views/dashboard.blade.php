@@ -4,6 +4,9 @@
     @if (auth()->user()->role === 'caregiver')
         @php
             $caregiverProfile = auth()->user()->caregiverProfile;
+            $assignmentCount = auth()->user()
+                ->caregiverAssignments()
+                ->count();
         @endphp
 
         <div class="page-header">
@@ -51,6 +54,30 @@
             </section>
 
             <section class="panel">
+                <h2>My Assignments</h2>
+
+                <div class="stat-number">
+                    {{ $assignmentCount }}
+                </div>
+
+
+                <p class="muted">
+                    Total child-care bookings assigned to you.
+                </p>
+
+                <a class="button" href="{{ route('caregiver.assignments.index') }}">
+                    View Assignments
+                </a>
+
+                <a
+                    class="button button-secondary"
+                    href="{{ route('caregiver.schedule.index') }}"
+                >
+                    View Schedule
+                </a>
+            </section>
+
+            <section class="panel">
                 <h2>Availability</h2>
 
                 <p>
@@ -60,8 +87,15 @@
                 </p>
 
                 <p class="muted">
-                    Assigned children and schedules will appear here after the assignment feature is added.
+                    Admin can assign new bookings while you are available.
                 </p>
+
+                <a
+                    class="button button-secondary"
+                    href="{{ route('caregiver.profile.show') }}"
+                >
+                    View Profile
+                </a>
             </section>
         </div>
     @else
@@ -154,6 +188,10 @@
                 <strong>Role:</strong>
                 {{ ucfirst(auth()->user()->role) }}
             </p>
+
+            <a class="button" href="{{ route('profile.show') }}">
+                View Profile
+            </a>
         </section>
     </div>
     @endif
