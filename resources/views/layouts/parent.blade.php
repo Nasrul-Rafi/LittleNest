@@ -541,13 +541,23 @@
                     <a
                         href="{{ route('caregiver.assignments.index') }}"
                         class="{{ request()->routeIs(
-                            'caregiver.assignments.*',
-                            'caregiver.activities.*'
+                            'caregiver.assignments.*'
                         )
                             ? 'active'
                             : '' }}"
                     >
                         My Assignments
+                    </a>
+
+                    <a
+                        href="{{ route('caregiver.activities.index') }}"
+                        class="{{ request()->routeIs(
+                            'caregiver.activities.*'
+                        )
+                            ? 'active'
+                            : '' }}"
+                    >
+                        Activity History
                     </a>
 
                     <a

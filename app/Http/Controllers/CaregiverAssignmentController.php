@@ -62,4 +62,55 @@ class CaregiverAssignmentController extends Controller
             compact('assignment', 'activities')
         );
     }
+
+    public function complete(
+        Request $request,
+        CaregiverAssignment $assignment
+    ) {
+        if (
+            $request->user()->role !== 'caregiver'
+            || $request->user()->status !== 'active'
+        ) {
+            abort(403);
+        }
+
+        if ($assignment->caregiver_id !== $request->user()->id) {
+            abort(403);
+        }
+
+        $assignment->load('booking');
+
+        if (
+            $assignment->status !== 'assigned'
+            || $assignment->booking->status !== 'confirmed'
+        ) {
+            return redirect()
+                ->route('caregiver.assignments.show', $assignment)
+                ->with(
+                    'error',
+                    'Only an active confirmed assignment can be completed.'
+                );
+        }
+
+        if (!$assignment->activities()->exists()) {
+            return redirect()
+                ->route('caregiver.assignments.show', $assignment)
+                ->with(
+                    'error',
+                    'Add at least one activity update before completing care.'
+                );
+        }
+
+        $assignment->update([
+            'status' => 'completed',
+        ]);
+
+        $assignment->booking->update([
+            'status' => 'completed',
+        ]);
+
+        return redirect()
+            ->route('caregiver.assignments.show', $assignment)
+            ->with('success', 'Care assignment completed successfully.');
+    }
 }

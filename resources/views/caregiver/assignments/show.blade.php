@@ -61,7 +61,11 @@
             <div class="detail-item">
                 <span class="detail-label">Assignment Status</span>
                 <p class="detail-value">
-                    <span class="badge badge-active">
+                    <span
+                        class="badge badge-{{ $assignment->status === 'completed'
+                            ? 'completed'
+                            : 'confirmed' }}"
+                    >
                         {{ $assignment->status }}
                     </span>
                 </p>
@@ -96,6 +100,53 @@
             </div>
         </div>
     </section>
+
+    @if (
+        $assignment->status === 'assigned'
+        && $assignment->booking->status === 'confirmed'
+    )
+        <section class="panel">
+            <div class="page-header">
+                <div>
+                    <h2>Complete Care</h2>
+                    <p>
+                        Complete this assignment after recording the child's
+                        care activities.
+                    </p>
+                </div>
+
+                <form
+                    method="POST"
+                    action="{{ route(
+                        'caregiver.assignments.complete',
+                        $assignment
+                    ) }}"
+                    onsubmit="return confirm(
+                        'Complete this care assignment?'
+                    );"
+                >
+                    @csrf
+
+                    <button class="button" type="submit">
+                        Complete Care
+                    </button>
+                </form>
+            </div>
+
+            @if ($activities->isEmpty())
+                <p class="muted">
+                    Add at least one activity update before completing care.
+                </p>
+            @endif
+        </section>
+    @elseif ($assignment->status === 'completed')
+        <section class="panel">
+            <h2>Care Completed</h2>
+            <p class="muted">
+                This assignment and its booking have been marked as completed.
+            </p>
+        </section>
+    @endif
 
     <section class="panel">
         <div class="page-header">

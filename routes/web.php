@@ -132,6 +132,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/caregiver/assignments/{assignment}', [CaregiverAssignmentController::class, 'show'])
         ->name('caregiver.assignments.show');
 
+    Route::post('/caregiver/assignments/{assignment}/complete', [CaregiverAssignmentController::class, 'complete'])
+        ->name('caregiver.assignments.complete');
+
     Route::get('/caregiver/schedule', [CaregiverScheduleController::class, 'index'])
         ->name('caregiver.schedule.index');
 
@@ -143,6 +146,9 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/caregiver/profile/update', [CaregiverProfileController::class, 'update'])
         ->name('caregiver.profile.update');
+
+    Route::get('/caregiver/activities', [CaregiverActivityController::class, 'index'])
+        ->name('caregiver.activities.index');
 
     Route::get('/caregiver/assignments/{assignment}/activities/create', [CaregiverActivityController::class, 'create'])
         ->name('caregiver.activities.create');

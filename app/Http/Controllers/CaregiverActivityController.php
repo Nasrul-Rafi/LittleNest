@@ -9,6 +9,71 @@ use Illuminate\Support\Facades\Storage;
 
 class CaregiverActivityController extends Controller
 {
+    public function index(Request $request)
+    {
+        if (
+            $request->user()->role !== 'caregiver'
+            || $request->user()->status !== 'active'
+        ) {
+            abort(403);
+        }
+
+        $activityTypes = [
+            'check-in',
+            'check-out',
+            'meal',
+            'nap',
+            'play',
+            'learning',
+            'toilet',
+            'health',
+            'medicine',
+            'mood',
+            'special-notes',
+        ];
+
+        $validated = $request->validate([
+            'activity_type' => [
+                'nullable',
+                'in:' . implode(',', $activityTypes),
+            ],
+            'activity_date' => ['nullable', 'date'],
+        ]);
+
+        $activities = ChildActivity::whereHas(
+            'assignment',
+            function ($query) use ($request) {
+                $query->where(
+                    'caregiver_id',
+                    $request->user()->id
+                );
+            }
+        )
+            ->with([
+                'assignment.booking.child',
+                'assignment.booking.service',
+            ])
+            ->when(
+                $validated['activity_type'] ?? null,
+                function ($query, $activityType) {
+                    $query->where('activity_type', $activityType);
+                }
+            )
+            ->when(
+                $validated['activity_date'] ?? null,
+                function ($query, $activityDate) {
+                    $query->whereDate('activity_time', $activityDate);
+                }
+            )
+            ->orderBy('activity_time', 'desc')
+            ->get();
+
+        return view(
+            'caregiver.activities.index',
+            compact('activities', 'activityTypes')
+        );
+    }
+
     public function create(
         Request $request,
         CaregiverAssignment $assignment
