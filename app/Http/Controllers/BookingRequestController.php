@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Booking;
 use App\Models\ParentProfile;
-use Carbon\Carbon;
+use App\Models\TimeSlot;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -20,9 +20,33 @@ class BookingRequestController extends Controller
         $this->ensureOwnership($booking, $parentProfile);
         $this->ensureRequestCanBeCreated($booking, $type);
 
+        $timeSlots = collect();
+
+        if ($type === 'reschedule') {
+            $timeSlots = TimeSlot::with('service')
+                ->withCount([
+                    'bookings as active_bookings_count' => function ($query) {
+                        $query->whereIn('status', ['pending', 'confirmed']);
+                    },
+                ])
+                ->where('service_id', $booking->service_id)
+                ->where('status', 'open')
+                ->whereDate('slot_date', '>=', today())
+                ->when($booking->slot_id, function ($query) use ($booking) {
+                    $query->where('slot_id', '!=', $booking->slot_id);
+                })
+                ->orderBy('slot_date')
+                ->orderBy('start_time')
+                ->get()
+                ->filter(function (TimeSlot $timeSlot) {
+                    return $timeSlot->isBookable();
+                })
+                ->values();
+        }
+
         return view(
             'booking-requests.create',
-            compact('booking', 'type')
+            compact('booking', 'type', 'timeSlots')
         );
     }
 
@@ -38,16 +62,11 @@ class BookingRequestController extends Controller
                 'required',
                 'in:cancellation,reschedule',
             ],
-            'requested_date' => [
+            'requested_slot_id' => [
                 'required_if:request_type,reschedule',
                 'nullable',
-                'date',
-                'after_or_equal:today',
-            ],
-            'requested_time' => [
-                'required_if:request_type,reschedule',
-                'nullable',
-                'date_format:H:i',
+                'integer',
+                'exists:time_slots,slot_id',
             ],
             'reason' => ['required', 'string', 'max:2000'],
         ]);
@@ -57,19 +76,22 @@ class BookingRequestController extends Controller
             $validated['request_type']
         );
 
-        if ($validated['request_type'] === 'reschedule') {
-            $requestedDateTime = Carbon::createFromFormat(
-                'Y-m-d H:i',
-                $validated['requested_date']
-                    . ' '
-                    . $validated['requested_time']
-            );
+        $requestedSlot = null;
 
-            if ($requestedDateTime->isPast()) {
+        if ($validated['request_type'] === 'reschedule') {
+            $requestedSlot = TimeSlot::with('service')
+                ->find($validated['requested_slot_id']);
+
+            if (
+                !$requestedSlot
+                || $requestedSlot->service_id !== $booking->service_id
+                || !$requestedSlot->isBookable()
+                || $requestedSlot->slot_id === $booking->slot_id
+            ) {
                 return back()
                     ->withErrors([
-                        'requested_time' =>
-                            'Requested date and time must be in the future.',
+                        'requested_slot_id' =>
+                            'Please choose another available slot for the same service.',
                     ])
                     ->withInput();
             }
@@ -77,14 +99,13 @@ class BookingRequestController extends Controller
 
         $booking->bookingRequests()->create([
             'request_type' => $validated['request_type'],
-            'requested_date' =>
-                $validated['request_type'] === 'reschedule'
-                    ? $validated['requested_date']
-                    : null,
-            'requested_time' =>
-                $validated['request_type'] === 'reschedule'
-                    ? $validated['requested_time']
-                    : null,
+            'requested_slot_id' => $requestedSlot?->slot_id,
+            'requested_date' => $requestedSlot
+                ? $requestedSlot->slot_date->format('Y-m-d')
+                : null,
+            'requested_time' => $requestedSlot
+                ? $requestedSlot->start_time
+                : null,
             'reason' => $validated['reason'],
             'request_status' => 'pending',
         ]);

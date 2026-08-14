@@ -37,7 +37,7 @@
                     <tbody>
                         @foreach ($assignments as $assignment)
                             <tr>
-                                <td>#{{ $assignment->booking->booking_id }}</td>
+                                <td>{{ $assignment->booking->display_reference }}</td>
 
                                 <td>
                                     <strong>

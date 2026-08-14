@@ -103,7 +103,7 @@
                             <tr>
                                 <td>
                                     <a href="{{ route('admin.bookings.show', $booking) }}">
-                                        #{{ $booking->booking_id }}
+                                        {{ $booking->display_reference }}
                                     </a>
                                 </td>
                                 <td>{{ $booking->child->parentProfile->user->name }}</td>

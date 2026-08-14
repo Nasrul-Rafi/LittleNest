@@ -6,6 +6,7 @@ use App\Http\Controllers\AdminCaregiverController;
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\AdminPaymentController;
 use App\Http\Controllers\AdminServiceController;
+use App\Http\Controllers\AdminTimeSlotController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\BookingRequestController;
@@ -56,6 +57,9 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/admin/bookings/{booking}/confirm', [AdminBookingController::class, 'confirm'])
         ->name('admin.bookings.confirm');
+
+    Route::post('/admin/bookings/{booking}/reject', [AdminBookingController::class, 'reject'])
+        ->name('admin.bookings.reject');
 
     Route::post('/admin/bookings/{booking}/assign-caregiver', [AdminBookingController::class, 'assignCaregiver'])
         ->name('admin.bookings.assign-caregiver');
@@ -125,6 +129,24 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/admin/services/{service}/status', [AdminServiceController::class, 'changeStatus'])
         ->name('admin.services.status');
+
+    Route::get('/admin/time-slots', [AdminTimeSlotController::class, 'index'])
+        ->name('admin.time-slots.index');
+
+    Route::get('/admin/time-slots/create', [AdminTimeSlotController::class, 'create'])
+        ->name('admin.time-slots.create');
+
+    Route::post('/admin/time-slots', [AdminTimeSlotController::class, 'store'])
+        ->name('admin.time-slots.store');
+
+    Route::get('/admin/time-slots/{timeSlot}/edit', [AdminTimeSlotController::class, 'edit'])
+        ->name('admin.time-slots.edit');
+
+    Route::post('/admin/time-slots/{timeSlot}/update', [AdminTimeSlotController::class, 'update'])
+        ->name('admin.time-slots.update');
+
+    Route::post('/admin/time-slots/{timeSlot}/status', [AdminTimeSlotController::class, 'changeStatus'])
+        ->name('admin.time-slots.status');
 
     Route::get('/caregiver/assignments', [CaregiverAssignmentController::class, 'index'])
         ->name('caregiver.assignments.index');

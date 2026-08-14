@@ -17,6 +17,7 @@ class AdminBookingController extends Controller
         $bookings = Booking::with([
             'child.parentProfile.user',
             'service',
+            'timeSlot',
             'caregiverAssignment.caregiver',
         ])
             ->orderBy('booking_date', 'desc')
@@ -34,6 +35,7 @@ class AdminBookingController extends Controller
         $booking->load([
             'child.parentProfile.user',
             'service',
+            'timeSlot',
             'caregiverAssignment.caregiver',
             'caregiverAssignment.activities',
         ]);
@@ -69,6 +71,30 @@ class AdminBookingController extends Controller
         return redirect()
             ->route('admin.bookings.show', $booking)
             ->with('success', 'Booking confirmed successfully.');
+    }
+
+    public function reject(Request $request, Booking $booking)
+    {
+        if ($request->user()->role !== 'admin') {
+            abort(403);
+        }
+
+        if ($booking->status !== 'pending') {
+            return back()->with(
+                'error',
+                'Only pending bookings can be rejected.'
+            );
+        }
+
+        $booking->status = 'cancelled';
+        $booking->save();
+
+        return redirect()
+            ->route('admin.bookings.show', $booking)
+            ->with(
+                'success',
+                'Booking rejected successfully. The reserved slot is available again.'
+            );
     }
 
     public function assignCaregiver(Request $request, Booking $booking)

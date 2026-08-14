@@ -3,7 +3,7 @@
 @section('content')
     <div class="page-header">
         <div>
-            <h1>Booking #{{ $booking->booking_id }}</h1>
+            <h1>Booking {{ $booking->display_reference }}</h1>
 
             <p>View booking information and current status.</p>
         </div>
@@ -50,6 +50,13 @@
                         'h:i A',
                         strtotime($booking->booking_time)
                     ) }}
+
+                    @if ($booking->timeSlot)
+                        – {{ date(
+                            'h:i A',
+                            strtotime($booking->timeSlot->end_time)
+                        ) }}
+                    @endif
                 </p>
             </div>
 

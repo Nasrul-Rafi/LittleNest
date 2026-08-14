@@ -10,7 +10,7 @@
             </h1>
 
             <p>
-                Booking #{{ $booking->booking_id }} will remain unchanged
+                Booking {{ $booking->display_reference }} will remain unchanged
                 until Admin approves this request.
             </p>
         </div>
@@ -34,33 +34,41 @@
 
             <div class="form-grid">
                 @if ($type === 'reschedule')
-                    <div class="form-group">
-                        <label for="requested_date">
-                            New Date <span class="required">*</span>
+                    <div class="form-group form-group-full">
+                        <label for="requested_slot_id">
+                            New Available Time Slot
+                            <span class="required">*</span>
                         </label>
 
-                        <input
-                            id="requested_date"
-                            name="requested_date"
-                            type="date"
-                            min="{{ now()->format('Y-m-d') }}"
-                            value="{{ old('requested_date') }}"
-                            required
-                        >
-                    </div>
+                        @if ($timeSlots->isEmpty())
+                            <div class="alert alert-error">
+                                No alternative slot is currently available for
+                                {{ $booking->service->name }}.
+                            </div>
+                        @else
+                            <select
+                                id="requested_slot_id"
+                                name="requested_slot_id"
+                                required
+                            >
+                                <option value="">Select a new slot</option>
 
-                    <div class="form-group">
-                        <label for="requested_time">
-                            New Time <span class="required">*</span>
-                        </label>
-
-                        <input
-                            id="requested_time"
-                            name="requested_time"
-                            type="time"
-                            value="{{ old('requested_time') }}"
-                            required
-                        >
+                                @foreach ($timeSlots as $timeSlot)
+                                    <option
+                                        value="{{ $timeSlot->slot_id }}"
+                                        @selected(
+                                            old('requested_slot_id')
+                                                == $timeSlot->slot_id
+                                        )
+                                    >
+                                        {{ $timeSlot->slot_date->format('d M Y') }}
+                                        — {{ date('h:i A', strtotime($timeSlot->start_time)) }}
+                                        to {{ date('h:i A', strtotime($timeSlot->end_time)) }}
+                                        — {{ $timeSlot->remainingCapacity() }} place(s) left
+                                    </option>
+                                @endforeach
+                            </select>
+                        @endif
                     </div>
                 @endif
 
@@ -78,7 +86,11 @@
             </div>
 
             <div class="form-actions">
-                <button class="button" type="submit">
+                <button
+                    class="button"
+                    type="submit"
+                    @disabled($type === 'reschedule' && $timeSlots->isEmpty())
+                >
                     Submit Request
                 </button>
             </div>

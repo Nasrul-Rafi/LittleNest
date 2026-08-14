@@ -98,7 +98,7 @@
                                 </td>
 
                                 <td>
-                                    #{{ $activity->assignment->booking_id }}
+                                    {{ $activity->assignment->booking->display_reference }}
                                     <br>
                                     <span class="muted">
                                         {{ $activity->assignment->booking

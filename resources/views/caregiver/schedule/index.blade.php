@@ -85,7 +85,7 @@
                                     </td>
 
                                     <td>
-                                        #{{ $assignment->booking_id }}
+                                        {{ $assignment->booking->display_reference }}
                                         <br>
                                         <span class="badge badge-confirmed">
                                             confirmed

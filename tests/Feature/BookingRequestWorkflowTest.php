@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Booking;
 use App\Models\BookingRequest;
 use App\Models\Service;
+use App\Models\TimeSlot;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -42,11 +43,19 @@ class BookingRequestWorkflowTest extends TestCase
         [$parent, $booking] = $this->createConfirmedBooking();
         $newDate = now()->addDays(5)->format('Y-m-d');
 
+        $newSlot = TimeSlot::create([
+            'service_id' => $booking->service_id,
+            'slot_date' => $newDate,
+            'start_time' => '14:30',
+            'end_time' => '16:30',
+            'capacity' => 4,
+            'status' => 'open',
+        ]);
+
         $this->actingAs($parent)
             ->post(route('booking-requests.store', $booking), [
                 'request_type' => 'reschedule',
-                'requested_date' => $newDate,
-                'requested_time' => '14:30',
+                'requested_slot_id' => $newSlot->slot_id,
                 'reason' => 'A later time will work better.',
             ])
             ->assertRedirect(route('bookings.show', $booking));
@@ -54,6 +63,7 @@ class BookingRequestWorkflowTest extends TestCase
         $this->assertDatabaseHas('booking_requests', [
             'booking_id' => $booking->booking_id,
             'request_type' => 'reschedule',
+            'requested_slot_id' => $newSlot->slot_id,
             'requested_time' => '14:30',
             'request_status' => 'pending',
         ]);
@@ -108,9 +118,7 @@ class BookingRequestWorkflowTest extends TestCase
 
         $this->actingAs($parent)
             ->post(route('booking-requests.store', $booking), [
-                'request_type' => 'reschedule',
-                'requested_date' => now()->addDays(4)->format('Y-m-d'),
-                'requested_time' => '15:00',
+                'request_type' => 'cancellation',
                 'reason' => 'Second request.',
             ])
             ->assertUnprocessable();
@@ -244,10 +252,20 @@ class BookingRequestWorkflowTest extends TestCase
             'status' => 'active',
         ]);
 
+        $timeSlot = TimeSlot::create([
+            'service_id' => $service->service_id,
+            'slot_date' => now()->addDays(2)->format('Y-m-d'),
+            'start_time' => '10:00',
+            'end_time' => '12:00',
+            'capacity' => 4,
+            'status' => 'open',
+        ]);
+
         $booking = $child->bookings()->create([
             'service_id' => $service->service_id,
-            'booking_date' => now()->addDays(2)->format('Y-m-d'),
-            'booking_time' => '10:00',
+            'slot_id' => $timeSlot->slot_id,
+            'booking_date' => $timeSlot->slot_date->format('Y-m-d'),
+            'booking_time' => $timeSlot->start_time,
             'status' => 'confirmed',
             'total_amount' => $service->price,
         ]);

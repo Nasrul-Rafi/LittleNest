@@ -15,14 +15,41 @@ class Booking extends Model
     protected $primaryKey = 'booking_id';
 
     protected $fillable = [
+        'booking_reference',
         'child_id',
         'service_id',
+        'slot_id',
         'booking_date',
         'booking_time',
         'special_instructions',
         'status',
         'total_amount',
     ];
+
+    protected static function booted(): void
+    {
+        static::created(function (Booking $booking) {
+            if ($booking->booking_reference) {
+                return;
+            }
+
+            $year = $booking->booking_date
+                ? $booking->booking_date->format('Y')
+                : now()->format('Y');
+
+            $booking->booking_reference = 'LN-'
+                . $year
+                . '-'
+                . str_pad(
+                    (string) $booking->booking_id,
+                    4,
+                    '0',
+                    STR_PAD_LEFT
+                );
+
+            $booking->saveQuietly();
+        });
+    }
 
     protected function casts(): array
     {
@@ -48,6 +75,21 @@ class Booking extends Model
             'service_id',
             'service_id'
         );
+    }
+
+    public function timeSlot(): BelongsTo
+    {
+        return $this->belongsTo(
+            TimeSlot::class,
+            'slot_id',
+            'slot_id'
+        );
+    }
+
+    public function getDisplayReferenceAttribute(): string
+    {
+        return $this->booking_reference
+            ?: '#' . $this->booking_id;
     }
 
     public function caregiverAssignment(): HasOne

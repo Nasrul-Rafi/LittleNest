@@ -4,7 +4,7 @@
     <div class="page-header">
         <div>
             <h1>New Booking</h1>
-            <p>Select a child, service and appointment time.</p>
+            <p>Select your child and an available service time slot.</p>
         </div>
 
         <a
@@ -28,12 +28,13 @@
                     Add Child
                 </a>
             </div>
-        @elseif ($services->isEmpty())
+        @elseif ($timeSlots->isEmpty())
             <div class="empty-state">
-                <h2>No service is currently available</h2>
+                <h2>No available time slot found</h2>
 
                 <p>
-                    Please try again after a service becomes available.
+                    No service slot currently has available capacity.
+                    Please try again later.
                 </p>
             </div>
         @else
@@ -71,67 +72,32 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="service_id">
-                            Service <span class="required">*</span>
+                        <label for="slot_id">
+                            Available Time Slot
+                            <span class="required">*</span>
                         </label>
 
                         <select
-                            id="service_id"
-                            name="service_id"
+                            id="slot_id"
+                            name="slot_id"
                             required
                         >
-                            <option value="">Select service</option>
+                            <option value="">Select service and time</option>
 
-                            @foreach ($services as $service)
+                            @foreach ($timeSlots as $timeSlot)
                                 <option
-                                    value="{{ $service->service_id }}"
-                                    @selected(
-                                        old('service_id')
-                                            == $service->service_id
-                                    )
+                                    value="{{ $timeSlot->slot_id }}"
+                                    @selected(old('slot_id') == $timeSlot->slot_id)
                                 >
-                                    {{ $service->name }}
-                                    — ৳{{ number_format(
-                                        (float) $service->price,
-                                        2
-                                    ) }}
+                                    {{ $timeSlot->service->name }}
+                                    — {{ $timeSlot->slot_date->format('d M Y') }}
+                                    — {{ date('h:i A', strtotime($timeSlot->start_time)) }}
+                                    to {{ date('h:i A', strtotime($timeSlot->end_time)) }}
+                                    — {{ $timeSlot->remainingCapacity() }} place(s) left
+                                    — ৳{{ number_format((float) $timeSlot->service->price, 2) }}
                                 </option>
                             @endforeach
                         </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="booking_date">
-                            Booking Date
-                            <span class="required">*</span>
-                        </label>
-
-                        <input
-                            id="booking_date"
-                            type="date"
-                            name="booking_date"
-                            min="{{ now()->format('Y-m-d') }}"
-                            value="{{ old(
-                                'booking_date',
-                                now()->addDay()->format('Y-m-d')
-                            ) }}"
-                            required
-                        >
-                    </div>
-
-                    <div class="form-group">
-                        <label for="booking_time">
-                            Booking Time
-                            <span class="required">*</span>
-                        </label>
-
-                        <input
-                            id="booking_time"
-                            type="time"
-                            name="booking_time"
-                            value="{{ old('booking_time') }}"
-                            required
-                        >
                     </div>
 
                     <div class="form-group form-group-full">
@@ -146,6 +112,11 @@
                             placeholder="Allergies, pickup instructions or other information..."
                         >{{ old('special_instructions') }}</textarea>
                     </div>
+                </div>
+
+                <div class="alert alert-success">
+                    New bookings are created as Pending. Admin will review the
+                    booking before it becomes Confirmed.
                 </div>
 
                 <div class="form-actions">

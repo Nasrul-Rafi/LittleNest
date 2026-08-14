@@ -39,7 +39,7 @@
                         @foreach ($payments as $payment)
                             <tr>
                                 <td>#{{ $payment->payment_id }}</td>
-                                <td>#{{ $payment->booking_id }}</td>
+                                <td>{{ $payment->booking->display_reference }}</td>
                                 <td>
                                     {{ $payment->booking->child->parentProfile->user->name }}
                                 </td>

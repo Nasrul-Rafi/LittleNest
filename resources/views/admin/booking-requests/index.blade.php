@@ -33,7 +33,7 @@
                         @foreach ($bookingRequests as $bookingRequest)
                             <tr>
                                 <td>#{{ $bookingRequest->request_id }}</td>
-                                <td>#{{ $bookingRequest->booking_id }}</td>
+                                <td>{{ $bookingRequest->booking->display_reference }}</td>
                                 <td>
                                     {{ $bookingRequest->booking
                                         ->child->parentProfile->user->name }}

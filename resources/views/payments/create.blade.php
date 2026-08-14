@@ -5,7 +5,7 @@
         <div>
             <h1>Submit Payment</h1>
 
-            <p>Submit payment information for Booking #{{ $booking->booking_id }}.</p>
+            <p>Submit payment information for Booking {{ $booking->display_reference }}.</p>
         </div>
 
         <a

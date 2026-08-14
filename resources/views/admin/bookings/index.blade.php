@@ -39,7 +39,7 @@
                     <tbody>
                         @foreach ($bookings as $booking)
                             <tr>
-                                <td>#{{ $booking->booking_id }}</td>
+                                <td>{{ $booking->display_reference }}</td>
                                 <td>{{ $booking->child->parentProfile->user->name }}</td>
                                 <td><strong>{{ $booking->child->full_name }}</strong></td>
                                 <td>{{ $booking->service->name }}</td>
@@ -80,6 +80,19 @@
 
                                                 <button class="button button-small" type="submit">
                                                     Confirm
+                                                </button>
+                                            </form>
+
+                                            <form method="POST"
+                                                action="{{ route('admin.bookings.reject', $booking) }}"
+                                                onsubmit="return confirm('Reject this booking?');">
+                                                @csrf
+
+                                                <button
+                                                    class="button button-small button-danger"
+                                                    type="submit"
+                                                >
+                                                    Reject
                                                 </button>
                                             </form>
                                         @endif

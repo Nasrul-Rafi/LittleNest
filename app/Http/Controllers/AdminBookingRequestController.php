@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\BookingRequest;
+use App\Models\TimeSlot;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class AdminBookingRequestController extends Controller
@@ -16,6 +18,7 @@ class AdminBookingRequestController extends Controller
         $bookingRequests = BookingRequest::with([
             'booking.child.parentProfile.user',
             'booking.service',
+            'requestedSlot',
             'reviewer',
         ])
             ->latest('request_id')
@@ -36,6 +39,7 @@ class AdminBookingRequestController extends Controller
         $bookingRequest->load([
             'booking.child.parentProfile.user',
             'booking.service',
+            'requestedSlot',
             'reviewer',
         ]);
 
@@ -74,10 +78,16 @@ class AdminBookingRequestController extends Controller
         if ($bookingRequest->request_type === 'cancellation') {
             $booking->update(['status' => 'cancelled']);
         } else {
-            $booking->update([
-                'booking_date' => $bookingRequest->requested_date,
-                'booking_time' => $bookingRequest->requested_time,
-            ]);
+            $updated = $this->approveReschedule(
+                $bookingRequest
+            );
+
+            if (!$updated) {
+                return back()->with(
+                    'error',
+                    'The requested time slot is no longer available. Ask the parent to choose another slot.'
+                );
+            }
         }
 
         $bookingRequest->update([
@@ -119,6 +129,46 @@ class AdminBookingRequestController extends Controller
         return redirect()
             ->route('admin.booking-requests.show', $bookingRequest)
             ->with('success', 'Booking request rejected successfully.');
+    }
+
+    private function approveReschedule(
+        BookingRequest $bookingRequest
+    ): bool {
+        $booking = $bookingRequest->booking;
+
+        if (!$bookingRequest->requested_slot_id) {
+            $booking->update([
+                'booking_date' => $bookingRequest->requested_date,
+                'booking_time' => $bookingRequest->requested_time,
+            ]);
+
+            return true;
+        }
+
+        return DB::transaction(function () use (
+            $booking,
+            $bookingRequest
+        ) {
+            $timeSlot = TimeSlot::with('service')
+                ->lockForUpdate()
+                ->find($bookingRequest->requested_slot_id);
+
+            if (
+                !$timeSlot
+                || $timeSlot->service_id !== $booking->service_id
+                || !$timeSlot->isBookable()
+            ) {
+                return false;
+            }
+
+            $booking->update([
+                'slot_id' => $timeSlot->slot_id,
+                'booking_date' => $timeSlot->slot_date->format('Y-m-d'),
+                'booking_time' => $timeSlot->start_time,
+            ]);
+
+            return true;
+        });
     }
 
     private function ensureAdmin(Request $request): void

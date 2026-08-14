@@ -342,6 +342,16 @@
             background: #fff3bf;
         }
 
+        .badge-open {
+            color: #087f5b;
+            background: #dff7ed;
+        }
+
+        .badge-closed {
+            color: #636e72;
+            background: #eceff1;
+        }
+
         .badge-pending {
             color: #8a5d00;
             background: #fff3bf;
@@ -627,6 +637,15 @@
                             : '' }}"
                     >
                         Service Management
+                    </a>
+
+                    <a
+                        href="{{ route('admin.time-slots.index') }}"
+                        class="{{ request()->routeIs('admin.time-slots.*')
+                            ? 'active'
+                            : '' }}"
+                    >
+                        Time Slots
                     </a>
                 @endif
 

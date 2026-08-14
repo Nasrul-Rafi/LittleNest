@@ -36,4 +36,13 @@ class Service extends Model
             'service_id'
         );
     }
+
+    public function timeSlots(): HasMany
+    {
+        return $this->hasMany(
+            TimeSlot::class,
+            'service_id',
+            'service_id'
+        );
+    }
 }

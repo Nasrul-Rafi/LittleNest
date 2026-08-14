@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Booking;
 use App\Models\Child;
 use App\Models\Service;
+use App\Models\TimeSlot;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -63,15 +64,12 @@ class BookingCrudTest extends TestCase
             $this->createParentWithChild();
 
         $service = $this->createService();
+        $timeSlot = $this->createTimeSlot($service);
 
         $response = $this->actingAs($parent)
             ->post(route('bookings.store'), [
                 'child_id' => $child->child_id,
-                'service_id' => $service->service_id,
-                'booking_date' => now()
-                    ->addDays(2)
-                    ->format('Y-m-d'),
-                'booking_time' => '10:30',
+                'slot_id' => $timeSlot->slot_id,
                 'special_instructions' =>
                     'The child has a mild peanut allergy.',
             ]);
@@ -90,6 +88,7 @@ class BookingCrudTest extends TestCase
             'booking_id' => $booking->booking_id,
             'child_id' => $child->child_id,
             'service_id' => $service->service_id,
+            'slot_id' => $timeSlot->slot_id,
             'status' => 'pending',
             'total_amount' => $service->price,
             'special_instructions' =>
@@ -105,9 +104,7 @@ class BookingCrudTest extends TestCase
             ->post(route('bookings.store'), [])
             ->assertSessionHasErrors([
                 'child_id',
-                'service_id',
-                'booking_date',
-                'booking_time',
+                'slot_id',
             ]);
 
         $this->assertDatabaseCount('bookings', 0);
@@ -122,15 +119,12 @@ class BookingCrudTest extends TestCase
             $this->createParentWithChild('Second Child');
 
         $service = $this->createService();
+        $timeSlot = $this->createTimeSlot($service);
 
         $this->actingAs($firstParent)
             ->post(route('bookings.store'), [
                 'child_id' => $secondChild->child_id,
-                'service_id' => $service->service_id,
-                'booking_date' => now()
-                    ->addDays(2)
-                    ->format('Y-m-d'),
-                'booking_time' => '11:00',
+                'slot_id' => $timeSlot->slot_id,
             ])
             ->assertForbidden();
 
@@ -145,17 +139,14 @@ class BookingCrudTest extends TestCase
         $service = $this->createService([
             'status' => 'inactive',
         ]);
+        $timeSlot = $this->createTimeSlot($service);
 
         $this->actingAs($parent)
             ->post(route('bookings.store'), [
                 'child_id' => $child->child_id,
-                'service_id' => $service->service_id,
-                'booking_date' => now()
-                    ->addDays(2)
-                    ->format('Y-m-d'),
-                'booking_time' => '12:00',
+                'slot_id' => $timeSlot->slot_id,
             ])
-            ->assertSessionHasErrors('service_id');
+            ->assertSessionHasErrors('slot_id');
 
         $this->assertDatabaseCount('bookings', 0);
     }
@@ -168,15 +159,12 @@ class BookingCrudTest extends TestCase
         $service = $this->createService([
             'price' => 1200,
         ]);
+        $timeSlot = $this->createTimeSlot($service);
 
         $this->actingAs($parent)
             ->post(route('bookings.store'), [
                 'child_id' => $child->child_id,
-                'service_id' => $service->service_id,
-                'booking_date' => now()
-                    ->addDays(3)
-                    ->format('Y-m-d'),
-                'booking_time' => '09:30',
+                'slot_id' => $timeSlot->slot_id,
 
                 // A dishonest user may add these values.
                 'total_amount' => 1,
@@ -373,6 +361,20 @@ class BookingCrudTest extends TestCase
             'duration_minutes' => 60,
             'status' => 'active',
         ], $values));
+    }
+
+    private function createTimeSlot(
+        Service $service,
+        int $capacity = 3
+    ): TimeSlot {
+        return TimeSlot::create([
+            'service_id' => $service->service_id,
+            'slot_date' => now()->addDays(2)->format('Y-m-d'),
+            'start_time' => '10:30',
+            'end_time' => '11:30',
+            'capacity' => $capacity,
+            'status' => 'open',
+        ]);
     }
 
     private function createBooking(

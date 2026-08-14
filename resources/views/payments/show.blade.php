@@ -20,7 +20,7 @@
         <div class="detail-grid">
             <div class="detail-item">
                 <span class="detail-label">Booking</span>
-                <p class="detail-value">#{{ $payment->booking_id }}</p>
+                <p class="detail-value">{{ $payment->booking->display_reference }}</p>
             </div>
 
             <div class="detail-item">

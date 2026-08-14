@@ -3,7 +3,7 @@
 @section('content')
     <div class="page-header">
         <div>
-            <h1>Booking #{{ $booking->booking_id }}</h1>
+            <h1>Booking {{ $booking->display_reference }}</h1>
 
             <p>
                 Review the parent, child and service information.
@@ -62,6 +62,9 @@
 
                 <p class="detail-value">
                     {{ date('h:i A', strtotime($booking->booking_time)) }}
+                    @if ($booking->timeSlot)
+                        – {{ date('h:i A', strtotime($booking->timeSlot->end_time)) }}
+                    @endif
                 </p>
             </div>
 
@@ -105,6 +108,16 @@
 
                     <button class="button" type="submit">
                         Confirm Booking
+                    </button>
+                </form>
+
+                <form method="POST"
+                    action="{{ route('admin.bookings.reject', $booking) }}"
+                    onsubmit="return confirm('Reject this booking?');">
+                    @csrf
+
+                    <button class="button button-danger" type="submit">
+                        Reject Booking
                     </button>
                 </form>
             </div>

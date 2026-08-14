@@ -4,10 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Booking;
 use App\Models\ParentProfile;
-use App\Models\Service;
-use Carbon\Carbon;
+use App\Models\TimeSlot;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class BookingController extends Controller
@@ -17,7 +17,7 @@ class BookingController extends Controller
         $parentProfile = $this->getParentProfile($request);
 
         $bookings = $parentProfile->bookings()
-            ->with(['child', 'service'])
+            ->with(['child', 'service', 'timeSlot'])
             ->latest('booking_date')
             ->latest('booking_time')
             ->get();
@@ -34,13 +34,28 @@ class BookingController extends Controller
             ->orderBy('full_name')
             ->get();
 
-        $services = Service::where('status', 'active')
-            ->orderBy('name')
-            ->get();
+        $timeSlots = TimeSlot::with('service')
+            ->withCount([
+                'bookings as active_bookings_count' => function ($query) {
+                    $query->whereIn('status', ['pending', 'confirmed']);
+                },
+            ])
+            ->where('status', 'open')
+            ->whereDate('slot_date', '>=', today())
+            ->whereHas('service', function ($query) {
+                $query->where('status', 'active');
+            })
+            ->orderBy('slot_date')
+            ->orderBy('start_time')
+            ->get()
+            ->filter(function (TimeSlot $timeSlot) {
+                return $timeSlot->isBookable();
+            })
+            ->values();
 
         return view(
             'bookings.create',
-            compact('children', 'services')
+            compact('children', 'timeSlots')
         );
     }
 
@@ -53,18 +68,10 @@ class BookingController extends Controller
                 'required',
                 'integer',
             ],
-            'service_id' => [
+            'slot_id' => [
                 'required',
                 'integer',
-            ],
-            'booking_date' => [
-                'required',
-                'date',
-                'after_or_equal:today',
-            ],
-            'booking_time' => [
-                'required',
-                'date_format:H:i',
+                'exists:time_slots,slot_id',
             ],
             'special_instructions' => [
                 'nullable',
@@ -80,44 +87,38 @@ class BookingController extends Controller
 
         abort_unless($child, 403);
 
-        $service = Service::whereKey($validated['service_id'])
-            ->where('status', 'active')
-            ->first();
+        $booking = DB::transaction(function () use (
+            $validated,
+            $child
+        ) {
+            $timeSlot = TimeSlot::with('service')
+                ->lockForUpdate()
+                ->find($validated['slot_id']);
 
-        if (!$service) {
+            if (!$timeSlot || !$timeSlot->isBookable()) {
+                return null;
+            }
+
+            return $child->bookings()->create([
+                'service_id' => $timeSlot->service_id,
+                'slot_id' => $timeSlot->slot_id,
+                'booking_date' => $timeSlot->slot_date->format('Y-m-d'),
+                'booking_time' => $timeSlot->start_time,
+                'special_instructions' =>
+                    $validated['special_instructions'] ?? null,
+                'status' => 'pending',
+                'total_amount' => $timeSlot->service->price,
+            ]);
+        });
+
+        if (!$booking) {
             return back()
                 ->withErrors([
-                    'service_id' =>
-                        'The selected service is not available.',
+                    'slot_id' =>
+                        'The selected time slot is no longer available. Please choose another slot.',
                 ])
                 ->withInput();
         }
-
-        $bookingDateTime = Carbon::createFromFormat(
-            'Y-m-d H:i',
-            $validated['booking_date']
-                . ' '
-                . $validated['booking_time']
-        );
-
-        if ($bookingDateTime->isPast()) {
-            return back()
-                ->withErrors([
-                    'booking_time' =>
-                        'Booking date and time must be in the future.',
-                ])
-                ->withInput();
-        }
-
-        $booking = $child->bookings()->create([
-            'service_id' => $service->service_id,
-            'booking_date' => $validated['booking_date'],
-            'booking_time' => $validated['booking_time'],
-            'special_instructions' =>
-                $validated['special_instructions'] ?? null,
-            'status' => 'pending',
-            'total_amount' => $service->price,
-        ]);
 
         return redirect()
             ->route('bookings.show', $booking)
@@ -137,9 +138,11 @@ class BookingController extends Controller
         $booking->load([
             'child',
             'service',
+            'timeSlot',
             'caregiverAssignment.caregiver',
             'caregiverAssignment.activities',
             'bookingRequests.reviewer',
+            'bookingRequests.requestedSlot',
         ]);
 
         $payments = $booking->payments()

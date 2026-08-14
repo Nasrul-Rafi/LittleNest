@@ -44,7 +44,7 @@
                         @foreach ($bookings as $booking)
                             <tr>
                                 <td>
-                                    #{{ $booking->booking_id }}
+                                    {{ $booking->display_reference }}
                                 </td>
 
                                 <td>

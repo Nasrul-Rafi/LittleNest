@@ -24,7 +24,7 @@
                         'admin.bookings.show',
                         $bookingRequest->booking
                     ) }}">
-                        #{{ $bookingRequest->booking_id }}
+                        {{ $bookingRequest->booking->display_reference }}
                     </a>
                 </p>
             </div>
@@ -85,6 +85,13 @@
                             'h:i A',
                             strtotime($bookingRequest->requested_time)
                         ) }}
+
+                        @if ($bookingRequest->requestedSlot)
+                            – {{ date(
+                                'h:i A',
+                                strtotime($bookingRequest->requestedSlot->end_time)
+                            ) }}
+                        @endif
                     </p>
                 </div>
             @endif

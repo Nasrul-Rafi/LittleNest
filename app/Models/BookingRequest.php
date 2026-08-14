@@ -15,6 +15,7 @@ class BookingRequest extends Model
     protected $fillable = [
         'booking_id',
         'request_type',
+        'requested_slot_id',
         'requested_date',
         'requested_time',
         'reason',
@@ -38,6 +39,15 @@ class BookingRequest extends Model
             Booking::class,
             'booking_id',
             'booking_id'
+        );
+    }
+
+    public function requestedSlot(): BelongsTo
+    {
+        return $this->belongsTo(
+            TimeSlot::class,
+            'requested_slot_id',
+            'slot_id'
         );
     }
 
