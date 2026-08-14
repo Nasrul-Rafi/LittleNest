@@ -73,6 +73,12 @@
         </select>
     </div>
 
+
+    <div class="form-group">
+        <label for="guardian_relation">Guardian Relation</label>
+        <input type="text" id="guardian_relation" name="guardian_relation" maxlength="50" value="{{ old('guardian_relation', $child?->guardian_relation) }}" placeholder="e.g. Mother, Father">
+    </div>
+
     <div class="form-group">
         <label for="status">
             Status <span class="required">*</span>
@@ -121,6 +127,12 @@
         >{{ old('medical_notes', $child?->medical_notes) }}</textarea>
     </div>
 
+
+    <div class="form-group form-group-full">
+        <label for="medicine_instructions">Medicine Instructions</label>
+        <textarea id="medicine_instructions" name="medicine_instructions" maxlength="2000" placeholder="Write medicine instructions, if any.">{{ old('medicine_instructions', $child?->medicine_instructions) }}</textarea>
+    </div>
+
     <div class="form-group form-group-full">
         <label for="special_needs">Special Needs</label>
 
@@ -130,5 +142,9 @@
             maxlength="2000"
             placeholder="Write special care instructions, if any."
         >{{ old('special_needs', $child?->special_needs) }}</textarea>
+    </div>
+    <div class="form-group form-group-full">
+        <label for="emergency_notes">Emergency Notes</label>
+        <textarea id="emergency_notes" name="emergency_notes" maxlength="2000" placeholder="Add urgent care or emergency notes.">{{ old('emergency_notes', $child?->emergency_notes) }}</textarea>
     </div>
 </div>

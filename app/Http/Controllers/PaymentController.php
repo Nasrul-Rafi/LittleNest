@@ -8,6 +8,24 @@ use Illuminate\Http\Request;
 
 class PaymentController extends Controller
 {
+    public function index(Request $request)
+    {
+        if ($request->user()->role !== 'parent') {
+            abort(403);
+        }
+
+        $parentProfile = $request->user()->parentProfile()->firstOrCreate();
+
+        $payments = Payment::with(['booking.child', 'booking.service'])
+            ->whereHas('booking.child', function ($query) use ($parentProfile) {
+                $query->where('parent_profile_id', $parentProfile->parent_profile_id);
+            })
+            ->latest('payment_id')
+            ->get();
+
+        return view('payments.index', compact('payments'));
+    }
+
     public function create(Request $request, Booking $booking)
     {
         $this->ensureParentOwnership($request, $booking);

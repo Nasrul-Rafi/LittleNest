@@ -114,9 +114,12 @@ class ChildController extends Controller
                 'before_or_equal:today',
             ],
             'gender' => ['nullable', 'in:male,female,other'],
+            'guardian_relation' => ['nullable', 'string', 'max:50'],
             'allergies' => ['nullable', 'string', 'max:2000'],
             'medical_notes' => ['nullable', 'string', 'max:2000'],
+            'medicine_instructions' => ['nullable', 'string', 'max:2000'],
             'special_needs' => ['nullable', 'string', 'max:2000'],
+            'emergency_notes' => ['nullable', 'string', 'max:2000'],
             'status' => ['required', 'in:active,inactive'],
         ]);
     }

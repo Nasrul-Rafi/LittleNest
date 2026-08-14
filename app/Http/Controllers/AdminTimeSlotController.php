@@ -215,6 +215,8 @@ class AdminTimeSlotController extends Controller
         ], [
             'service_id.unique' =>
                 'This service already has the same time slot.',
+            'end_time.after' =>
+                'Please select an end time that is later than the start time.',
         ]);
     }
 

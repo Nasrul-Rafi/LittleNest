@@ -32,6 +32,16 @@
     </div>
 
     <div class="form-group">
+        <label for="min_age">Minimum Age</label>
+        <input type="number" id="min_age" name="min_age" min="0" max="18" value="{{ old('min_age', $service->min_age ?? '') }}" placeholder="Example: 2">
+    </div>
+
+    <div class="form-group">
+        <label for="max_age">Maximum Age</label>
+        <input type="number" id="max_age" name="max_age" min="0" max="18" value="{{ old('max_age', $service->max_age ?? '') }}" placeholder="Example: 6">
+    </div>
+
+    <div class="form-group">
         <label for="duration_minutes">
             Duration (Minutes) <span class="required">*</span>
         </label>

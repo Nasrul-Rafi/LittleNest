@@ -40,6 +40,14 @@
             </div>
 
             <div class="detail-item">
+                <span class="detail-label">Age Group</span>
+                <p class="detail-value">
+                    {{ $service->min_age !== null ? $service->min_age : 'Any' }}
+                    {{ $service->max_age !== null ? '–'.$service->max_age.' years' : '' }}
+                </p>
+            </div>
+
+            <div class="detail-item">
                 <span class="detail-label">Duration</span>
                 <p class="detail-value">
                     {{ $service->duration_minutes }} minutes

@@ -18,10 +18,13 @@ class Child extends Model
         'full_name',
         'date_of_birth',
         'gender',
+        'guardian_relation',
         'photo',
         'allergies',
         'medical_notes',
+        'medicine_instructions',
         'special_needs',
+        'emergency_notes',
         'status',
     ];
 

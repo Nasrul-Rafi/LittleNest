@@ -59,6 +59,11 @@
             </div>
 
             <div class="detail-item">
+                <span class="detail-label">Guardian Relation</span>
+                <p class="detail-value">{{ $child->guardian_relation ?: 'Not provided' }}</p>
+            </div>
+
+            <div class="detail-item">
                 <span class="detail-label">Gender</span>
 
                 <p class="detail-value">
@@ -83,6 +88,16 @@
                     {{ $child->medical_notes
                         ?: 'No medical notes provided.' }}
                 </p>
+            </div>
+
+            <div class="detail-item detail-item-full">
+                <span class="detail-label">Medicine Instructions</span>
+                <p class="detail-value">{{ $child->medicine_instructions ?: 'None' }}</p>
+            </div>
+
+            <div class="detail-item detail-item-full">
+                <span class="detail-label">Emergency Notes</span>
+                <p class="detail-value">{{ $child->emergency_notes ?: 'None' }}</p>
             </div>
 
             <div class="detail-item detail-item-full">

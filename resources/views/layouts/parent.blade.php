@@ -12,16 +12,16 @@
 
     <style>
         :root {
-            --primary: #6c5ce7;
-            --primary-dark: #5647c7;
-            --secondary: #00b894;
+            --primary: #6F8F83;
+            --primary-dark: #58756B;
+            --secondary: #6F8F83;
             --danger: #d63031;
             --warning: #e17055;
-            --background: #f6f7fb;
+            --background: #FAF8F3;
             --surface: #ffffff;
-            --text: #2d3436;
-            --muted: #636e72;
-            --border: #dfe6e9;
+            --text: #27332F;
+            --muted: #68736F;
+            --border: #DCE4E0;
             --success-bg: #dff7ed;
             --success-text: #087f5b;
             --error-bg: #ffe3e3;
@@ -36,7 +36,7 @@
             margin: 0;
             color: var(--text);
             background: var(--background);
-            font-family: Arial, Helvetica, sans-serif;
+            font-family: Inter, Arial, Helvetica, sans-serif;
             line-height: 1.6;
         }
 
@@ -45,15 +45,20 @@
         }
 
         .topbar {
-            color: white;
-            background: var(--primary);
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            color: var(--text);
+            background: transparent;
+            box-shadow: none;
         }
 
         .topbar-inner {
             width: min(1120px, 92%);
-            min-height: 70px;
-            margin: 0 auto;
+            min-height: 64px;
+            margin: 18px auto 0;
+            padding: 10px 14px 10px 20px;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            box-shadow: 0 8px 28px rgba(39, 51, 47, 0.05);
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -61,7 +66,7 @@
         }
 
         .brand {
-            color: white;
+            color: var(--primary-dark);
             font-size: 24px;
             font-weight: 700;
             text-decoration: none;
@@ -70,13 +75,15 @@
         .navigation {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
         }
 
         .navigation a,
         .navigation button {
             padding: 9px 14px;
-            color: white;
+            color: var(--muted);
             background: transparent;
             border: 0;
             border-radius: 7px;
@@ -88,7 +95,8 @@
         .navigation a:hover,
         .navigation button:hover,
         .navigation a.active {
-            background: rgba(255, 255, 255, 0.18);
+            color: var(--text);
+            background: #E8F0EC;
         }
 
         .navigation form {
@@ -125,7 +133,7 @@
             background: var(--surface);
             border: 1px solid var(--border);
             border-radius: 12px;
-            box-shadow: 0 4px 18px rgba(45, 52, 54, 0.05);
+            box-shadow: 0 8px 30px rgba(39, 51, 47, 0.04);
         }
 
         .panel h2 {
@@ -155,8 +163,8 @@
         .button {
             display: inline-block;
             padding: 10px 16px;
-            color: white;
-            background: var(--primary);
+            color: var(--text);
+            background: transparent;
             border: 1px solid var(--primary);
             border-radius: 8px;
             font: inherit;
@@ -178,8 +186,8 @@
         }
 
         .button-secondary:hover {
-            color: white;
-            background: var(--primary);
+            color: var(--text);
+            background: transparent;
         }
 
         .button-danger {
@@ -310,7 +318,7 @@
         }
 
         tbody tr:hover {
-            background: #fafaff;
+            background: #F8FBF9;
         }
 
         .badge {
@@ -528,6 +536,13 @@
                     </a>
 
                     <a
+                        href="{{ route('bookings.create') }}"
+                        class="{{ request()->routeIs('bookings.create') ? 'active' : '' }}"
+                    >
+                        Book a Service
+                    </a>
+
+                    <a
                         href="{{ route('bookings.index') }}"
                         class="{{ request()->routeIs(
                             'bookings.*',
@@ -537,6 +552,24 @@
                             : '' }}"
                     >
                         My Bookings
+                    </a>
+
+                    <a
+                        href="{{ route('activities.index') }}"
+                        class="{{ request()->routeIs('activities.*')
+                            ? 'active'
+                            : '' }}"
+                    >
+                        Child Activities
+                    </a>
+
+                    <a
+                        href="{{ route('payments.index') }}"
+                        class="{{ request()->routeIs('payments.*')
+                            ? 'active'
+                            : '' }}"
+                    >
+                        Payments
                     </a>
 
                     <a
@@ -593,6 +626,16 @@
                     </a>
                 @elseif (auth()->user()->role === 'admin')
                     <a
+                        href="{{ route('admin.parents.index') }}"
+                        class="{{ request()->routeIs('admin.parents.*') ? 'active' : '' }}"
+                    >Parents</a>
+
+                    <a
+                        href="{{ route('admin.children.index') }}"
+                        class="{{ request()->routeIs('admin.children.*') ? 'active' : '' }}"
+                    >Children</a>
+
+                    <a
                         href="{{ route('admin.bookings.index') }}"
                         class="{{ request()->routeIs('admin.bookings.*')
                             ? 'active'
@@ -647,6 +690,21 @@
                     >
                         Time Slots
                     </a>
+
+                    <a
+                        href="{{ route('admin.activities.index') }}"
+                        class="{{ request()->routeIs('admin.activities.*') ? 'active' : '' }}"
+                    >Activities</a>
+
+                    <a
+                        href="{{ route('admin.reports.index') }}"
+                        class="{{ request()->routeIs('admin.reports.*') ? 'active' : '' }}"
+                    >Reports</a>
+
+                    <a
+                        href="{{ route('admin.inquiries.index') }}"
+                        class="{{ request()->routeIs('admin.inquiries.*') ? 'active' : '' }}"
+                    >Inquiries</a>
                 @endif
 
                 <form method="POST" action="{{ route('logout') }}">

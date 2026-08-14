@@ -1,10 +1,18 @@
 <?php
 
 use App\Http\Controllers\AdminBookingController;
+use App\Http\Controllers\AdminActivityController;
+use App\Http\Controllers\AdminChildController;
+use App\Http\Controllers\AdminInquiryController;
+use App\Http\Controllers\AdminParentController;
+use App\Http\Controllers\ParentActivityController;
+use App\Http\Controllers\ParentCaregiverController;
+use App\Http\Controllers\PublicPageController;
 use App\Http\Controllers\AdminBookingRequestController;
 use App\Http\Controllers\AdminCaregiverController;
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\AdminPaymentController;
+use App\Http\Controllers\AdminReportController;
 use App\Http\Controllers\AdminServiceController;
 use App\Http\Controllers\AdminTimeSlotController;
 use App\Http\Controllers\AuthController;
@@ -19,9 +27,12 @@ use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ParentProfileController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-})->name('home');
+Route::get('/', [PublicPageController::class, 'home'])->name('home');
+Route::get('/services', [PublicPageController::class, 'services'])->name('public.services');
+Route::get('/services/{service}', [PublicPageController::class, 'service'])->name('public.services.show');
+Route::get('/about', [PublicPageController::class, 'about'])->name('about');
+Route::get('/contact', [PublicPageController::class, 'contact'])->name('contact');
+Route::post('/contact', [PublicPageController::class, 'sendContact'])->name('contact.store');
 
 Route::middleware('guest')->group(function () {
     Route::get('/register', [AuthController::class, 'showRegister'])
@@ -75,6 +86,39 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/admin/booking-requests/{bookingRequest}/reject', [AdminBookingRequestController::class, 'reject'])
         ->name('admin.booking-requests.reject');
+
+    Route::get('/admin/parents', [AdminParentController::class, 'index'])
+        ->name('admin.parents.index');
+
+    Route::get('/admin/parents/{parent}', [AdminParentController::class, 'show'])
+        ->name('admin.parents.show');
+
+    Route::get('/admin/children', [AdminChildController::class, 'index'])
+        ->name('admin.children.index');
+
+    Route::get('/admin/children/{child}', [AdminChildController::class, 'show'])
+        ->name('admin.children.show');
+
+    Route::get('/admin/activities', [AdminActivityController::class, 'index'])
+        ->name('admin.activities.index');
+
+    Route::get('/admin/activities/{activity}', [AdminActivityController::class, 'show'])
+        ->name('admin.activities.show');
+
+    Route::get('/admin/reports', [AdminReportController::class, 'index'])
+        ->name('admin.reports.index');
+
+    Route::get('/admin/reports/bookings.csv', [AdminReportController::class, 'exportBookings'])
+        ->name('admin.reports.bookings-csv');
+
+    Route::get('/admin/inquiries', [AdminInquiryController::class, 'index'])
+        ->name('admin.inquiries.index');
+
+    Route::get('/admin/inquiries/{message}', [AdminInquiryController::class, 'show'])
+        ->name('admin.inquiries.show');
+
+    Route::post('/admin/inquiries/{message}/status', [AdminInquiryController::class, 'updateStatus'])
+        ->name('admin.inquiries.status');
 
     Route::get('/admin/caregivers', [AdminCaregiverController::class, 'index'])
         ->name('admin.caregivers.index');
@@ -183,6 +227,18 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/caregiver/activities/{activity}/update', [CaregiverActivityController::class, 'update'])
         ->name('caregiver.activities.update');
+
+    Route::get('/activities', [ParentActivityController::class, 'index'])
+        ->name('activities.index');
+
+    Route::get('/activities/{activity}', [ParentActivityController::class, 'show'])
+        ->name('activities.show');
+
+    Route::get('/assigned-caregivers/{assignment}', [ParentCaregiverController::class, 'show'])
+        ->name('caregivers.show');
+
+    Route::get('/payments', [PaymentController::class, 'index'])
+        ->name('payments.index');
 
     Route::get('/bookings/{booking}/payment', [PaymentController::class, 'create'])
         ->name('payments.create');

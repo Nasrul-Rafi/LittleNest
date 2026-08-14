@@ -313,6 +313,12 @@
                     </p>
                 </div>
             </div>
+
+            <div class="form-actions">
+                <a class="button button-secondary" href="{{ route('caregivers.show', $booking->caregiverAssignment) }}">
+                    View Caregiver Profile
+                </a>
+            </div>
         @else
             <p class="muted">
                 A caregiver has not been assigned to this booking yet.

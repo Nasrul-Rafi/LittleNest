@@ -1,0 +1,7 @@
+@extends('layouts.parent', ['title' => 'Child Details'])
+@section('content')
+<div class="page-header"><div><h1>{{ $child->full_name }}</h1><p>Child profile and care information.</p></div><a class="button button-secondary" href="{{ route('admin.children.index') }}">Back</a></div>
+<div class="panel"><div class="detail-grid">
+<div class="detail-item"><span class="detail-label">Parent</span><p class="detail-value">{{ $child->parentProfile->user->name }}</p></div><div class="detail-item"><span class="detail-label">DOB</span><p class="detail-value">{{ $child->date_of_birth->format('d M Y') }}</p></div><div class="detail-item"><span class="detail-label">Gender</span><p class="detail-value">{{ ucfirst($child->gender ?: 'Not specified') }}</p></div><div class="detail-item"><span class="detail-label">Guardian Relation</span><p class="detail-value">{{ $child->guardian_relation ?: 'Not provided' }}</p></div><div class="detail-item"><span class="detail-label">Allergies</span><p class="detail-value">{{ $child->allergies ?: 'None' }}</p></div><div class="detail-item"><span class="detail-label">Medical Notes</span><p class="detail-value">{{ $child->medical_notes ?: 'None' }}</p></div><div class="detail-item"><span class="detail-label">Medicine Instructions</span><p class="detail-value">{{ $child->medicine_instructions ?: 'None' }}</p></div><div class="detail-item"><span class="detail-label">Emergency Notes</span><p class="detail-value">{{ $child->emergency_notes ?: 'None' }}</p></div>
+</div></div>
+@endsection

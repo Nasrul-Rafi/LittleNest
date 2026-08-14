@@ -38,6 +38,8 @@ class AdminServiceController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:100', 'unique:services,name'],
             'description' => ['nullable', 'string', 'max:2000'],
+            'min_age' => ['nullable', 'integer', 'min:0', 'max:18'],
+            'max_age' => ['nullable', 'integer', 'min:0', 'max:18', 'gte:min_age'],
             'price' => ['required', 'numeric', 'min:0', 'max:99999999.99'],
             'duration_minutes' => ['required', 'integer', 'min:15', 'max:1440'],
             'status' => ['required', 'in:active,inactive'],
@@ -86,6 +88,8 @@ class AdminServiceController extends Controller
                     . ',service_id',
             ],
             'description' => ['nullable', 'string', 'max:2000'],
+            'min_age' => ['nullable', 'integer', 'min:0', 'max:18'],
+            'max_age' => ['nullable', 'integer', 'min:0', 'max:18', 'gte:min_age'],
             'price' => ['required', 'numeric', 'min:0', 'max:99999999.99'],
             'duration_minutes' => ['required', 'integer', 'min:15', 'max:1440'],
             'status' => ['required', 'in:active,inactive'],
