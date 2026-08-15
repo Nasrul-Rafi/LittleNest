@@ -1,6 +1,17 @@
 @extends('layouts.parent', ['title' => 'Child Activities'])
 @section('content')
-<div class="page-header"><div><h1>Child Activity Timeline</h1><p>Follow timestamped updates posted by your child’s assigned caregiver.</p></div></div>
+<div class="page-header">
+    <div>
+        <h1>Child Activity Timeline</h1>
+        <p>Follow timestamped updates posted by your child’s assigned caregiver.</p>
+    </div>
+    <a
+        class="button button-secondary"
+        href="{{ route('activities.summary', request()->only(['child_id', 'activity_date'])) }}"
+    >
+        Download Summary
+    </a>
+</div>
 <div class="panel">
     <form method="GET" class="form-grid">
         <div class="form-group"><label for="child_id">Child</label><select name="child_id" id="child_id"><option value="">All children</option>@foreach($children as $child)<option value="{{ $child->child_id }}" @selected((string)request('child_id') === (string)$child->child_id)>{{ $child->full_name }}</option>@endforeach</select></div>

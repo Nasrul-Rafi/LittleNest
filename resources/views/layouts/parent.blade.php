@@ -2,115 +2,157 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ $title ?? 'LittleNest Portal' }}</title>
-
     <style>
         :root {
             --primary: #6F8F83;
             --primary-dark: #58756B;
-            --secondary: #6F8F83;
-            --danger: #d63031;
-            --warning: #e17055;
-            --background: #FAF8F3;
-            --surface: #ffffff;
+            --primary-light: #E8F0EC;
+            --cream: #FAF8F3;
+            --neutral: #F6F7F5;
+            --blue: #EEF4F6;
+            --lavender: #F3F0F5;
+            --peach: #F7EFE7;
+            --surface: #FFFFFF;
             --text: #27332F;
             --muted: #68736F;
             --border: #DCE4E0;
-            --success-bg: #dff7ed;
-            --success-text: #087f5b;
-            --error-bg: #ffe3e3;
-            --error-text: #c92a2a;
+            --danger: #C65D5D;
+            --success-bg: #E7F2ED;
+            --success-text: #315F4E;
+            --error-bg: #FBECEC;
+            --error-text: #934646;
         }
 
-        * {
-            box-sizing: border-box;
-        }
+        * { box-sizing: border-box; }
 
         body {
             margin: 0;
             color: var(--text);
-            background: var(--background);
+            background: var(--cream);
             font-family: Inter, Arial, Helvetica, sans-serif;
-            line-height: 1.6;
+            line-height: 1.55;
         }
 
-        a {
-            color: inherit;
+        a { color: inherit; }
+
+        .portal-shell {
+            width: min(1380px, 96%);
+            min-height: calc(100vh - 36px);
+            margin: 18px auto;
+            display: grid;
+            grid-template-columns: 236px minmax(0, 1fr);
+            gap: 22px;
         }
 
-        .topbar {
-            color: var(--text);
-            background: transparent;
-            box-shadow: none;
-        }
-
-        .topbar-inner {
-            width: min(1120px, 92%);
-            min-height: 64px;
-            margin: 18px auto 0;
-            padding: 10px 14px 10px 20px;
-            background: white;
-            border: 1px solid var(--border);
-            border-radius: 18px;
-            box-shadow: 0 8px 28px rgba(39, 51, 47, 0.05);
+        .sidebar {
+            position: sticky;
+            top: 18px;
+            height: calc(100vh - 36px);
+            padding: 22px 16px;
+            color: white;
+            background: var(--primary-dark);
+            border-radius: 22px;
             display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 24px;
+            flex-direction: column;
+            overflow-y: auto;
         }
 
         .brand {
-            color: var(--primary-dark);
-            font-size: 24px;
-            font-weight: 700;
+            display: block;
+            margin: 2px 10px 0;
+            color: white;
+            font-size: 23px;
+            font-weight: 800;
             text-decoration: none;
+            letter-spacing: -.4px;
+        }
+
+        .role-label {
+            margin: 2px 10px 22px;
+            color: rgba(255,255,255,.72);
+            font-size: 12px;
         }
 
         .navigation {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex-wrap: wrap;
-            justify-content: flex-end;
+            display: grid;
+            gap: 5px;
         }
 
         .navigation a,
         .navigation button {
-            padding: 9px 14px;
-            color: var(--muted);
+            width: 100%;
+            padding: 10px 12px;
+            color: rgba(255,255,255,.85);
             background: transparent;
             border: 0;
-            border-radius: 7px;
+            border-radius: 10px;
             font: inherit;
+            font-size: 14px;
             cursor: pointer;
+            text-align: left;
             text-decoration: none;
         }
 
         .navigation a:hover,
         .navigation button:hover,
         .navigation a.active {
-            color: var(--text);
-            background: #E8F0EC;
+            color: white;
+            background: rgba(255,255,255,.13);
         }
 
         .navigation form {
-            margin: 0;
+            margin: 8px 0 0;
+        }
+
+        .portal-main {
+            min-width: 0;
+        }
+
+        .topbar {
+            min-height: 70px;
+            padding: 14px 18px;
+            margin-bottom: 22px;
+            background: rgba(255,255,255,.94);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            box-shadow: 0 8px 28px rgba(39,51,47,.04);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .topbar strong {
+            display: block;
+            font-size: 15px;
+        }
+
+        .topbar span {
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .user-chip {
+            min-width: 42px;
+            height: 42px;
+            padding: 0 12px;
+            color: var(--primary-dark);
+            background: var(--primary-light);
+            border-radius: 999px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
         }
 
         .container {
-            width: min(1120px, 92%);
-            min-height: calc(100vh - 140px);
-            margin: 32px auto;
+            min-height: calc(100vh - 130px);
         }
 
         .page-header {
-            margin-bottom: 24px;
+            margin: 0 0 22px;
             display: flex;
             align-items: flex-start;
             justify-content: space-between;
@@ -118,8 +160,10 @@
         }
 
         .page-header h1 {
-            margin: 0 0 6px;
-            font-size: 30px;
+            margin: 0 0 5px;
+            font-size: clamp(25px, 3vw, 32px);
+            line-height: 1.2;
+            letter-spacing: -.7px;
         }
 
         .page-header p {
@@ -128,66 +172,82 @@
         }
 
         .panel {
-            padding: 24px;
-            margin-bottom: 24px;
+            padding: 22px;
+            margin-bottom: 20px;
             background: var(--surface);
             border: 1px solid var(--border);
-            border-radius: 12px;
-            box-shadow: 0 8px 30px rgba(39, 51, 47, 0.04);
+            border-radius: 16px;
+            box-shadow: 0 8px 28px rgba(39,51,47,.035);
         }
 
         .panel h2 {
-            margin-top: 0;
+            margin: 0 0 12px;
+            font-size: 19px;
         }
 
         .dashboard-grid {
             display: grid;
-            grid-template-columns: repeat(
-                auto-fit,
-                minmax(280px, 1fr)
-            );
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 16px;
         }
+
+        .dashboard-grid .panel:nth-child(4n+2) { background: #FCF8F3; }
+        .dashboard-grid .panel:nth-child(4n+3) { background: #F7FAFB; }
+        .dashboard-grid .panel:nth-child(4n+4) { background: #F9F7FA; }
 
         .stat-number {
-            margin: 10px 0;
-            color: var(--primary);
-            font-size: 42px;
-            font-weight: 700;
+            margin: 8px 0;
+            color: var(--primary-dark);
+            font-size: 38px;
+            font-weight: 800;
+            line-height: 1.1;
         }
 
-        .muted {
-            color: var(--muted);
+        .compact-stat { font-size: 28px; }
+
+        .stat-text {
+            margin: 10px 0 2px;
+            color: var(--primary-dark);
+            font-size: 22px;
+            font-weight: 800;
         }
+
+        .muted { color: var(--muted); }
 
         .button {
-            display: inline-block;
-            padding: 10px 16px;
-            color: var(--text);
-            background: transparent;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 40px;
+            padding: 9px 15px;
+            color: white;
+            background: var(--primary);
             border: 1px solid var(--primary);
-            border-radius: 8px;
+            border-radius: 9px;
             font: inherit;
-            font-weight: 600;
+            font-size: 14px;
+            font-weight: 700;
             cursor: pointer;
             text-align: center;
             text-decoration: none;
         }
 
         .button:hover {
+            color: white;
             background: var(--primary-dark);
             border-color: var(--primary-dark);
         }
 
         .button-secondary {
-            color: var(--primary);
+            color: var(--primary-dark);
             background: white;
-            border-color: var(--primary);
+            border-color: var(--border);
         }
 
         .button-secondary:hover {
-            color: var(--text);
-            background: transparent;
+            color: var(--primary-dark);
+            background: var(--primary-light);
+            border-color: var(--primary);
         }
 
         .button-danger {
@@ -197,13 +257,14 @@
         }
 
         .button-danger:hover {
-            background: #b02526;
-            border-color: #b02526;
+            background: #A94D4D;
+            border-color: #A94D4D;
         }
 
         .button-small {
-            padding: 7px 11px;
-            font-size: 14px;
+            min-height: 34px;
+            padding: 6px 10px;
+            font-size: 13px;
         }
 
         .action-group,
@@ -211,70 +272,86 @@
             display: flex;
             align-items: center;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 9px;
         }
 
         .action-group form,
-        .form-actions form {
-            margin: 0;
-        }
+        .form-actions form { margin: 0; }
 
-        .form-actions {
-            margin-top: 24px;
-        }
+        .form-actions { margin-top: 22px; }
 
         .alert {
-            padding: 14px 16px;
-            margin-bottom: 20px;
-            border-radius: 8px;
+            padding: 13px 15px;
+            margin-bottom: 18px;
+            border-radius: 11px;
         }
 
         .alert-success {
             color: var(--success-text);
             background: var(--success-bg);
-            border: 1px solid #b7ead8;
+            border: 1px solid #C8E2D7;
         }
 
         .alert-error {
             color: var(--error-text);
             background: var(--error-bg);
-            border: 1px solid #ffc9c9;
+            border: 1px solid #F0CACA;
         }
 
-        .alert ul {
-            margin: 8px 0 0;
-            padding-left: 22px;
-        }
+        .alert ul { margin: 7px 0 0; padding-left: 20px; }
 
         .form-grid {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 20px;
+            gap: 17px;
+        }
+
+        .form-grid-three {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .pagination-bar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+        .pagination-label {
+            color: var(--muted);
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .disabled-button {
+            pointer-events: none;
+            opacity: .5;
         }
 
         .form-group {
             display: flex;
             flex-direction: column;
-            gap: 7px;
+            gap: 6px;
         }
 
-        .form-group-full {
-            grid-column: 1 / -1;
-        }
+        .form-group-full { grid-column: 1 / -1; }
 
         .form-group label {
-            font-weight: 600;
+            font-size: 14px;
+            font-weight: 700;
         }
 
         input,
         select,
         textarea {
             width: 100%;
-            padding: 11px 12px;
+            padding: 10px 12px;
             color: var(--text);
             background: white;
             border: 1px solid var(--border);
-            border-radius: 8px;
+            border-radius: 9px;
             font: inherit;
         }
 
@@ -282,21 +359,17 @@
         select:focus,
         textarea:focus {
             border-color: var(--primary);
-            outline: 2px solid rgba(108, 92, 231, 0.15);
+            outline: 3px solid rgba(111,143,131,.12);
         }
 
         textarea {
-            min-height: 120px;
+            min-height: 118px;
             resize: vertical;
         }
 
-        .required {
-            color: var(--danger);
-        }
+        .required { color: var(--danger); }
 
-        .table-wrap {
-            overflow-x: auto;
-        }
+        .table-wrap { overflow-x: auto; }
 
         table {
             width: 100%;
@@ -305,7 +378,7 @@
 
         th,
         td {
-            padding: 13px 12px;
+            padding: 12px 11px;
             border-bottom: 1px solid var(--border);
             text-align: left;
             vertical-align: middle;
@@ -313,96 +386,66 @@
 
         th {
             color: var(--muted);
-            background: #fafafa;
-            font-size: 14px;
+            background: var(--neutral);
+            font-size: 13px;
         }
 
-        tbody tr:hover {
-            background: #F8FBF9;
-        }
+        tbody tr:hover { background: #FAFCFB; }
 
         .badge {
             display: inline-block;
-            padding: 5px 10px;
+            padding: 5px 9px;
             border-radius: 999px;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 700;
             text-transform: capitalize;
         }
 
-        .badge-active {
-            color: #087f5b;
-            background: #dff7ed;
+        .badge-active,
+        .badge-available,
+        .badge-open,
+        .badge-completed,
+        .badge-paid,
+        .badge-approved,
+        .badge-resolved {
+            color: #315F4E;
+            background: #E7F2ED;
         }
 
-        .badge-inactive {
-            color: #636e72;
-            background: #eceff1;
-        }
-
-        .badge-available {
-            color: #087f5b;
-            background: #dff7ed;
-        }
-
-        .badge-unavailable {
-            color: #8a5d00;
-            background: #fff3bf;
-        }
-
-        .badge-open {
-            color: #087f5b;
-            background: #dff7ed;
-        }
-
+        .badge-inactive,
         .badge-closed {
-            color: #636e72;
-            background: #eceff1;
+            color: #616A67;
+            background: #ECEFED;
         }
 
-        .badge-pending {
-            color: #8a5d00;
-            background: #fff3bf;
+        .badge-unavailable,
+        .badge-pending,
+        .badge-new {
+            color: #80602B;
+            background: #F7EFE0;
         }
 
-        .badge-confirmed {
-            color: #1c4f91;
-            background: #dbeafe;
+        .badge-confirmed,
+        .badge-open {
+            color: #486271;
+            background: #E7F1F5;
         }
 
-        .badge-completed {
-            color: #087f5b;
-            background: #dff7ed;
-        }
-
-        .badge-cancelled {
-            color: #c92a2a;
-            background: #ffe3e3;
-        }
-
-        .badge-paid {
-            color: #087f5b;
-            background: #dff7ed;
-        }
-
-        .badge-failed {
-            color: #c92a2a;
-            background: #ffe3e3;
+        .badge-cancelled,
+        .badge-failed,
+        .badge-rejected {
+            color: #934646;
+            background: #FBECEC;
         }
 
         .badge-refunded {
-            color: #765b3d;
-            background: #f7efe7;
+            color: #765B3D;
+            background: var(--peach);
         }
 
-        .badge-approved {
-            color: #087f5b;
-            background: #dff7ed;
-        }
-
-        .badge-rejected {
-            color: #c92a2a;
-            background: #ffe3e3;
+        .badge-assigned {
+            color: #486271;
+            background: var(--blue);
         }
 
         .empty-state {
@@ -410,351 +453,187 @@
             text-align: center;
         }
 
-        .empty-state h2 {
-            margin-bottom: 8px;
-        }
-
-        .empty-state p {
-            margin-bottom: 18px;
-            color: var(--muted);
-        }
+        .empty-state h2 { margin-bottom: 8px; }
+        .empty-state p { margin-bottom: 18px; color: var(--muted); }
 
         .detail-grid {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 20px;
+            gap: 15px;
         }
 
         .detail-item {
-            padding: 16px;
-            background: #fafafa;
+            padding: 15px;
+            background: var(--neutral);
             border: 1px solid var(--border);
-            border-radius: 9px;
+            border-radius: 11px;
         }
 
-        .detail-item-full {
-            grid-column: 1 / -1;
-        }
+        .detail-item-full { grid-column: 1 / -1; }
 
         .detail-label {
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
             color: var(--muted);
-            font-size: 14px;
-            font-weight: 600;
+            font-size: 12px;
+            font-weight: 700;
         }
 
         .detail-value {
             margin: 0;
-            font-weight: 600;
+            font-weight: 650;
         }
 
         .activity-list {
             display: grid;
-            gap: 14px;
+            gap: 12px;
         }
 
         .activity-item {
-            padding: 16px;
-            background: #fafafa;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: var(--blue);
             border: 1px solid var(--border);
-            border-radius: 9px;
+            border-radius: 11px;
         }
 
-        .activity-item p {
-            margin: 8px 0 0;
-        }
+        .activity-item:nth-child(3n+2) { background: var(--peach); }
+        .activity-item:nth-child(3n+3) { background: var(--lavender); }
+
+        .activity-item p { margin: 7px 0 0; }
 
         .activity-photo {
             display: block;
             width: min(320px, 100%);
             margin-top: 12px;
-            border-radius: 9px;
+            border-radius: 10px;
         }
 
         .footer {
-            padding: 22px;
+            padding: 16px;
             color: var(--muted);
-            background: white;
-            border-top: 1px solid var(--border);
+            font-size: 12px;
             text-align: center;
         }
 
-        @media (max-width: 768px) {
-            .topbar-inner {
-                padding: 14px 0;
-                align-items: flex-start;
-                flex-direction: column;
-            }
-
-            .navigation {
-                width: 100%;
-                flex-wrap: wrap;
-            }
-
-            .page-header {
-                flex-direction: column;
-            }
-
-            .form-grid,
-            .detail-grid {
+        @media (max-width: 980px) {
+            .portal-shell {
+                width: min(94%, 900px);
                 grid-template-columns: 1fr;
             }
 
-            .form-group-full,
-            .detail-item-full {
-                grid-column: auto;
+            .sidebar {
+                position: static;
+                height: auto;
+                border-radius: 18px;
             }
 
-            .panel {
-                padding: 18px;
+            .navigation {
+                display: flex;
+                flex-wrap: wrap;
             }
+
+            .navigation a,
+            .navigation button {
+                width: auto;
+            }
+
+            .navigation form {
+                margin: 0;
+            }
+        }
+
+        @media (max-width: 680px) {
+            .portal-shell { width: 94%; margin-top: 12px; }
+            .sidebar { padding: 18px 13px; }
+            .topbar { align-items: flex-start; }
+            .page-header { flex-direction: column; }
+            .form-grid,
+            .form-grid-three,
+            .detail-grid { grid-template-columns: 1fr; }
+            .form-group-full,
+            .detail-item-full { grid-column: auto; }
+            .panel { padding: 17px; }
+            th, td { padding: 10px 9px; white-space: nowrap; }
         }
     </style>
 </head>
-
 <body>
-    <header class="topbar">
-        <div class="topbar-inner">
-            <a class="brand" href="{{ route('dashboard') }}">
-                LittleNest
-            </a>
+    <div class="portal-shell">
+        <aside class="sidebar">
+            <a class="brand" href="{{ route('dashboard') }}">LittleNest</a>
+            <div class="role-label">{{ ucfirst(auth()->user()->role) }} Portal</div>
 
             <nav class="navigation">
-                <a
-                    href="{{ route('dashboard') }}"
-                    class="{{ request()->routeIs('dashboard', 'admin.dashboard')
-                        ? 'active'
-                        : '' }}"
-                >
-                    Dashboard
-                </a>
+                <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard', 'admin.dashboard') ? 'active' : '' }}">Dashboard</a>
 
                 @if (auth()->user()->role === 'parent')
-                    <a
-                        href="{{ route('children.index') }}"
-                        class="{{ request()->routeIs('children.*')
-                            ? 'active'
-                            : '' }}"
-                    >
-                        My Children
-                    </a>
-
-                    <a
-                        href="{{ route('bookings.create') }}"
-                        class="{{ request()->routeIs('bookings.create') ? 'active' : '' }}"
-                    >
-                        Book a Service
-                    </a>
-
-                    <a
-                        href="{{ route('bookings.index') }}"
-                        class="{{ request()->routeIs(
-                            'bookings.*',
-                            'booking-requests.*'
-                        )
-                            ? 'active'
-                            : '' }}"
-                    >
-                        My Bookings
-                    </a>
-
-                    <a
-                        href="{{ route('activities.index') }}"
-                        class="{{ request()->routeIs('activities.*')
-                            ? 'active'
-                            : '' }}"
-                    >
-                        Child Activities
-                    </a>
-
-                    <a
-                        href="{{ route('payments.index') }}"
-                        class="{{ request()->routeIs('payments.*')
-                            ? 'active'
-                            : '' }}"
-                    >
-                        Payments
-                    </a>
-
-                    <a
-                        href="{{ route('profile.show') }}"
-                        class="{{ request()->routeIs('profile.*')
-                            ? 'active'
-                            : '' }}"
-                    >
-                        My Profile
-                    </a>
+                    <a href="{{ route('children.index') }}" class="{{ request()->routeIs('children.*') ? 'active' : '' }}">My Children</a>
+                    <a href="{{ route('bookings.create') }}" class="{{ request()->routeIs('bookings.create') ? 'active' : '' }}">Book a Service</a>
+                    <a href="{{ route('bookings.index') }}" class="{{ request()->routeIs('bookings.*', 'booking-requests.*') ? 'active' : '' }}">My Bookings</a>
+                    <a href="{{ route('activities.index') }}" class="{{ request()->routeIs('activities.*') ? 'active' : '' }}">Child Activities</a>
+                    <a href="{{ route('payments.index') }}" class="{{ request()->routeIs('payments.*') ? 'active' : '' }}">Payments</a>
+                    <a href="{{ route('profile.show') }}" class="{{ request()->routeIs('profile.*') ? 'active' : '' }}">Profile</a>
                 @elseif (auth()->user()->role === 'caregiver')
-                    <a
-                        href="{{ route('caregiver.assignments.index') }}"
-                        class="{{ request()->routeIs(
-                            'caregiver.assignments.*'
-                        )
-                            ? 'active'
-                            : '' }}"
-                    >
-                        My Assignments
-                    </a>
-
-                    <a
-                        href="{{ route('caregiver.activities.index') }}"
-                        class="{{ request()->routeIs(
-                            'caregiver.activities.*'
-                        )
-                            ? 'active'
-                            : '' }}"
-                    >
-                        Activity History
-                    </a>
-
-                    <a
-                        href="{{ route('caregiver.schedule.index') }}"
-                        class="{{ request()->routeIs(
-                            'caregiver.schedule.*'
-                        )
-                            ? 'active'
-                            : '' }}"
-                    >
-                        My Schedule
-                    </a>
-
-                    <a
-                        href="{{ route('caregiver.profile.show') }}"
-                        class="{{ request()->routeIs(
-                            'caregiver.profile.*'
-                        )
-                            ? 'active'
-                            : '' }}"
-                    >
-                        My Profile
-                    </a>
+                    <a href="{{ route('caregiver.assignments.index') }}" class="{{ request()->routeIs('caregiver.assignments.*') ? 'active' : '' }}">Assigned Children</a>
+                    <a href="{{ route('caregiver.activities.index') }}" class="{{ request()->routeIs('caregiver.activities.*') ? 'active' : '' }}">Activity History</a>
+                    <a href="{{ route('caregiver.schedule.index') }}" class="{{ request()->routeIs('caregiver.schedule.*') ? 'active' : '' }}">Schedule</a>
+                    <a href="{{ route('caregiver.profile.show') }}" class="{{ request()->routeIs('caregiver.profile.*') ? 'active' : '' }}">Profile</a>
                 @elseif (auth()->user()->role === 'admin')
-                    <a
-                        href="{{ route('admin.parents.index') }}"
-                        class="{{ request()->routeIs('admin.parents.*') ? 'active' : '' }}"
-                    >Parents</a>
-
-                    <a
-                        href="{{ route('admin.children.index') }}"
-                        class="{{ request()->routeIs('admin.children.*') ? 'active' : '' }}"
-                    >Children</a>
-
-                    <a
-                        href="{{ route('admin.bookings.index') }}"
-                        class="{{ request()->routeIs('admin.bookings.*')
-                            ? 'active'
-                            : '' }}"
-                    >
-                        Booking Management
-                    </a>
-
-                    <a
-                        href="{{ route('admin.caregivers.index') }}"
-                        class="{{ request()->routeIs('admin.caregivers.*')
-                            ? 'active'
-                            : '' }}"
-                    >
-                        Caregiver Management
-                    </a>
-
-                    <a
-                        href="{{ route('admin.booking-requests.index') }}"
-                        class="{{ request()->routeIs(
-                            'admin.booking-requests.*'
-                        )
-                            ? 'active'
-                            : '' }}"
-                    >
-                        Booking Requests
-                    </a>
-
-                    <a
-                        href="{{ route('admin.payments.index') }}"
-                        class="{{ request()->routeIs('admin.payments.*')
-                            ? 'active'
-                            : '' }}"
-                    >
-                        Payment Management
-                    </a>
-
-                    <a
-                        href="{{ route('admin.services.index') }}"
-                        class="{{ request()->routeIs('admin.services.*')
-                            ? 'active'
-                            : '' }}"
-                    >
-                        Service Management
-                    </a>
-
-                    <a
-                        href="{{ route('admin.time-slots.index') }}"
-                        class="{{ request()->routeIs('admin.time-slots.*')
-                            ? 'active'
-                            : '' }}"
-                    >
-                        Time Slots
-                    </a>
-
-                    <a
-                        href="{{ route('admin.activities.index') }}"
-                        class="{{ request()->routeIs('admin.activities.*') ? 'active' : '' }}"
-                    >Activities</a>
-
-                    <a
-                        href="{{ route('admin.reports.index') }}"
-                        class="{{ request()->routeIs('admin.reports.*') ? 'active' : '' }}"
-                    >Reports</a>
-
-                    <a
-                        href="{{ route('admin.inquiries.index') }}"
-                        class="{{ request()->routeIs('admin.inquiries.*') ? 'active' : '' }}"
-                    >Inquiries</a>
+                    <a href="{{ route('admin.parents.index') }}" class="{{ request()->routeIs('admin.parents.*') ? 'active' : '' }}">Parents</a>
+                    <a href="{{ route('admin.children.index') }}" class="{{ request()->routeIs('admin.children.*') ? 'active' : '' }}">Children</a>
+                    <a href="{{ route('admin.caregivers.index') }}" class="{{ request()->routeIs('admin.caregivers.*') ? 'active' : '' }}">Caregivers</a>
+                    <a href="{{ route('admin.services.index') }}" class="{{ request()->routeIs('admin.services.*') ? 'active' : '' }}">Services</a>
+                    <a href="{{ route('admin.time-slots.index') }}" class="{{ request()->routeIs('admin.time-slots.*') ? 'active' : '' }}">Time Slots</a>
+                    <a href="{{ route('admin.bookings.index') }}" class="{{ request()->routeIs('admin.bookings.*', 'admin.booking-requests.*') ? 'active' : '' }}">Bookings</a>
+                    <a href="{{ route('admin.assignments.index') }}" class="{{ request()->routeIs('admin.assignments.*') ? 'active' : '' }}">Assignments</a>
+                    <a href="{{ route('admin.activities.index') }}" class="{{ request()->routeIs('admin.activities.*') ? 'active' : '' }}">Activities</a>
+                    <a href="{{ route('admin.payments.index') }}" class="{{ request()->routeIs('admin.payments.*') ? 'active' : '' }}">Payments</a>
+                    <a href="{{ route('admin.reports.index') }}" class="{{ request()->routeIs('admin.reports.*') ? 'active' : '' }}">Reports</a>
+                    <a href="{{ route('admin.inquiries.index') }}" class="{{ request()->routeIs('admin.inquiries.*') ? 'active' : '' }}">Inquiries</a>
                 @endif
 
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
-
-                    <button type="submit">
-                        Logout
-                    </button>
+                    <button type="submit">Logout</button>
                 </form>
             </nav>
+        </aside>
+
+        <div class="portal-main">
+            <header class="topbar">
+                <div>
+                    <strong>Welcome back, {{ auth()->user()->name }}</strong>
+                    <span>Keep care records clear, secure and up to date.</span>
+                </div>
+                <div class="user-chip">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</div>
+            </header>
+
+            <main class="container">
+                @if (session('success'))
+                    <div class="alert alert-success">{{ session('success') }}</div>
+                @endif
+
+                @if (session('error'))
+                    <div class="alert alert-error">{{ session('error') }}</div>
+                @endif
+
+                @if ($errors->any())
+                    <div class="alert alert-error">
+                        <strong>Please correct the following information:</strong>
+                        <ul>
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
+                @yield('content')
+            </main>
+
+            <footer class="footer">&copy; {{ date('Y') }} LittleNest. All rights reserved.</footer>
         </div>
-    </header>
-
-    <main class="container">
-        @if (session('success'))
-            <div class="alert alert-success">
-                {{ session('success') }}
-            </div>
-        @endif
-
-        @if (session('error'))
-            <div class="alert alert-error">
-                {{ session('error') }}
-            </div>
-        @endif
-
-        @if ($errors->any())
-            <div class="alert alert-error">
-                <strong>
-                    Please correct the following information:
-                </strong>
-
-                <ul>
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
-
-        @yield('content')
-    </main>
-
-    <footer class="footer">
-        &copy; {{ date('Y') }} LittleNest. All rights reserved.
-    </footer>
+    </div>
 </body>
 </html>

@@ -8,6 +8,7 @@
     <div class="detail-item"><span class="detail-label">Experience</span><p class="detail-value">{{ $assignment->caregiver->caregiverProfile?->experience_years ?? 0 }} years</p></div>
     <div class="detail-item"><span class="detail-label">Specialization</span><p class="detail-value">{{ $assignment->caregiver->caregiverProfile?->specialization ?: 'Not provided' }}</p></div>
     <div class="detail-item"><span class="detail-label">Availability</span><p class="detail-value">{{ ucfirst($assignment->caregiver->caregiverProfile?->availability_status ?? 'unknown') }}</p></div>
+    <div class="detail-item"><span class="detail-label">Current Workload</span><p class="detail-value">{{ $currentWorkload }} active booking{{ $currentWorkload === 1 ? '' : 's' }}</p></div>
     <div class="detail-item detail-item-full"><span class="detail-label">Skills</span><p class="detail-value">{{ $assignment->caregiver->caregiverProfile?->skills ?: 'Not provided' }}</p></div>
     <div class="detail-item detail-item-full"><span class="detail-label">Biography</span><p class="detail-value">{{ $assignment->caregiver->caregiverProfile?->bio ?: 'Not provided' }}</p></div>
 </div></div>

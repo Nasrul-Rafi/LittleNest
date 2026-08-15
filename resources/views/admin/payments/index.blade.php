@@ -63,6 +63,7 @@
                             <th>Amount</th>
                             <th>Method</th>
                             <th>Status</th>
+                            <th>Date</th>
                             <th>Action</th>
                         </tr>
                     </thead>
@@ -80,6 +81,11 @@
                                     <span class="badge badge-{{ $payment->display_status }}">
                                         {{ $payment->display_status }}
                                     </span>
+                                </td>
+                                <td>
+                                    {{ $payment->refunded_at?->format('d M Y')
+                                        ?? $payment->paid_at?->format('d M Y')
+                                        ?? $payment->created_at->format('d M Y') }}
                                 </td>
                                 <td>
                                     <a

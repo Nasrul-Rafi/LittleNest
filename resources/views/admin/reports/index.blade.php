@@ -4,18 +4,20 @@
 <div class="page-header">
     <div>
         <h1>Reports & Summary</h1>
-        <p>Review bookings, revenue, refunds, services and care activity.</p>
+        <p>Review booking, revenue, service and caregiver analytics.</p>
     </div>
 
-    <a
-        class="button"
-        href="{{ route('admin.reports.bookings-csv', [
+    <div class="action-group">
+        <a class="button" target="_blank" href="{{ route('admin.reports.print', [
             'from_date' => $fromDate,
             'to_date' => $toDate,
-        ]) }}"
-    >
-        Export Bookings CSV
-    </a>
+        ]) }}">Export PDF</a>
+
+        <a class="button button-secondary" href="{{ route('admin.reports.bookings-csv', [
+            'from_date' => $fromDate,
+            'to_date' => $toDate,
+        ]) }}">Export CSV</a>
+    </div>
 </div>
 
 <section class="panel">
@@ -23,22 +25,12 @@
         <div class="form-grid">
             <div class="form-group">
                 <label for="from_date">From Date</label>
-                <input
-                    id="from_date"
-                    name="from_date"
-                    type="date"
-                    value="{{ $fromDate }}"
-                >
+                <input id="from_date" name="from_date" type="date" value="{{ $fromDate }}">
             </div>
 
             <div class="form-group">
                 <label for="to_date">To Date</label>
-                <input
-                    id="to_date"
-                    name="to_date"
-                    type="date"
-                    value="{{ $toDate }}"
-                >
+                <input id="to_date" name="to_date" type="date" value="{{ $toDate }}">
             </div>
         </div>
 
@@ -52,30 +44,50 @@
 <div class="dashboard-grid">
     <section class="panel"><h2>Total Bookings</h2><div class="stat-number">{{ $summary['total_bookings'] }}</div></section>
     <section class="panel"><h2>Completed</h2><div class="stat-number">{{ $summary['completed_bookings'] }}</div></section>
-    <section class="panel"><h2>Net Paid Revenue</h2><div class="stat-number" style="font-size:32px">৳{{ number_format((float) $summary['paid_revenue']) }}</div></section>
-    <section class="panel"><h2>Refunded</h2><div class="stat-number" style="font-size:32px">৳{{ number_format((float) $summary['refunded_amount']) }}</div></section>
+    <section class="panel"><h2>Net Paid Revenue</h2><div class="stat-number compact-stat">৳{{ number_format((float) $summary['paid_revenue']) }}</div></section>
+    <section class="panel"><h2>Refunded</h2><div class="stat-number compact-stat">৳{{ number_format((float) $summary['refunded_amount']) }}</div></section>
     <section class="panel"><h2>Activity Updates</h2><div class="stat-number">{{ $summary['activity_updates'] }}</div></section>
-    <section class="panel"><h2>Active Services</h2><div class="stat-number">{{ $summary['active_services'] }}</div></section>
-    <section class="panel"><h2>Active Caregivers</h2><div class="stat-number">{{ $summary['active_caregivers'] }}</div></section>
+    <section class="panel"><h2>Top Service</h2><div class="stat-text">{{ $topService?->name ?? 'No data' }}</div><p class="muted">{{ $topService?->bookings_count ?? 0 }} bookings</p></section>
 </div>
 
-<div class="panel">
-    <h2>Service Usage</h2>
-    <div class="table-wrap">
-        <table>
-            <thead><tr><th>Service</th><th>Bookings</th><th>Status</th></tr></thead>
-            <tbody>
-                @forelse($serviceUsage as $service)
-                    <tr>
-                        <td>{{ $service->name }}</td>
-                        <td>{{ $service->bookings_count }}</td>
-                        <td><span class="badge badge-{{ $service->status }}">{{ $service->status }}</span></td>
-                    </tr>
-                @empty
-                    <tr><td colspan="3">No services found.</td></tr>
-                @endforelse
-            </tbody>
-        </table>
+<div class="dashboard-grid">
+    <div class="panel">
+        <h2>Popular Services</h2>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Service</th><th>Bookings</th><th>Status</th></tr></thead>
+                <tbody>
+                    @forelse($serviceUsage as $service)
+                        <tr>
+                            <td>{{ $service->name }}</td>
+                            <td>{{ $service->bookings_count }}</td>
+                            <td><span class="badge badge-{{ $service->status }}">{{ $service->status }}</span></td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="3">No services found.</td></tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="panel">
+        <h2>Caregiver Workload</h2>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Caregiver</th><th>Bookings</th></tr></thead>
+                <tbody>
+                    @forelse($caregiverWorkload as $caregiver)
+                        <tr>
+                            <td>{{ $caregiver->name }}</td>
+                            <td>{{ $caregiver->workload_count }}</td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="2">No caregiver data found.</td></tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 

@@ -25,6 +25,14 @@ class ParentCaregiverController extends Controller
             403
         );
 
-        return view('caregivers.show', compact('assignment'));
+        $currentWorkload = $assignment->caregiver
+            ->caregiverAssignments()
+            ->where('status', 'assigned')
+            ->count();
+
+        return view('caregivers.show', compact(
+            'assignment',
+            'currentWorkload'
+        ));
     }
 }

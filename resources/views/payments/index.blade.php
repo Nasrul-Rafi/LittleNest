@@ -6,7 +6,10 @@
         <h1>Payment History</h1>
         <p>Review payment attempts, confirmed payments and refunds.</p>
     </div>
-    <span class="badge badge-confirmed">{{ $payments->count() }} records</span>
+    <div class="action-group">
+        <span class="badge badge-confirmed">{{ $payments->count() }} records</span>
+        <a class="button button-secondary" href="{{ route('payments.export') }}">Export History</a>
+    </div>
 </div>
 
 <div class="panel table-wrap">

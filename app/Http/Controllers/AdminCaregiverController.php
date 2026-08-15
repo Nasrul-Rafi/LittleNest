@@ -14,12 +14,42 @@ class AdminCaregiverController extends Controller
             abort(403);
         }
 
-        $caregivers = User::where('role', 'caregiver')
-            ->with('caregiverProfile')
+        $query = User::where('role', 'caregiver')
+            ->with('caregiverProfile');
+
+        $search = trim((string) $request->input('search'));
+        $status = $request->input('status');
+        $availability = $request->input('availability');
+
+        if ($search !== '') {
+            $query->where(function ($caregiverQuery) use ($search) {
+                $caregiverQuery
+                    ->where('name', 'like', '%' . $search . '%')
+                    ->orWhere('email', 'like', '%' . $search . '%')
+                    ->orWhere('phone', 'like', '%' . $search . '%');
+            });
+        }
+
+        if (in_array($status, ['active', 'inactive'], true)) {
+            $query->where('status', $status);
+        }
+
+        if (in_array($availability, ['available', 'unavailable'], true)) {
+            $query->whereHas('caregiverProfile', function ($profileQuery) use ($availability) {
+                $profileQuery->where('availability_status', $availability);
+            });
+        }
+
+        $caregivers = $query
             ->orderBy('name')
             ->get();
 
-        return view('admin.caregivers.index', compact('caregivers'));
+        return view('admin.caregivers.index', compact(
+            'caregivers',
+            'search',
+            'status',
+            'availability'
+        ));
     }
 
     public function create(Request $request)
@@ -141,14 +171,17 @@ class AdminCaregiverController extends Controller
 
         $caregiver->save();
 
-        $caregiver->caregiverProfile->update([
-            'qualification' => $validated['qualification'],
-            'experience_years' => $validated['experience_years'],
-            'specialization' => $validated['specialization'] ?? null,
-            'skills' => $validated['skills'] ?? null,
-            'bio' => $validated['bio'] ?? null,
-            'availability_status' => $validated['availability_status'],
-        ]);
+        $caregiver->caregiverProfile()->updateOrCreate(
+            ['user_id' => $caregiver->id],
+            [
+                'qualification' => $validated['qualification'],
+                'experience_years' => $validated['experience_years'],
+                'specialization' => $validated['specialization'] ?? null,
+                'skills' => $validated['skills'] ?? null,
+                'bio' => $validated['bio'] ?? null,
+                'availability_status' => $validated['availability_status'],
+            ]
+        );
 
         return redirect()
             ->route('admin.caregivers.show', $caregiver)

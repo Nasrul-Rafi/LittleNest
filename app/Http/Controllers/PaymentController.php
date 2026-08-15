@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Booking;
 use App\Models\Payment;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class PaymentController extends Controller
 {
@@ -27,6 +28,65 @@ class PaymentController extends Controller
             ->get();
 
         return view('payments.index', compact('payments'));
+    }
+
+    public function export(Request $request): StreamedResponse
+    {
+        if ($request->user()->role !== 'parent') {
+            abort(403);
+        }
+
+        $parentProfile = $request->user()->parentProfile()->firstOrCreate();
+
+        $payments = Payment::with(['booking.child', 'booking.service'])
+            ->whereHas('booking.child', function ($query) use ($parentProfile) {
+                $query->where(
+                    'parent_profile_id',
+                    $parentProfile->parent_profile_id
+                );
+            })
+            ->latest('payment_id')
+            ->get();
+
+        $fileName = 'littlenest-payment-history-' . now()->format('Y-m-d') . '.csv';
+
+        return response()->streamDownload(function () use ($payments) {
+            $handle = fopen('php://output', 'w');
+
+            fputcsv($handle, [
+                'Payment',
+                'Booking',
+                'Child',
+                'Service',
+                'Amount',
+                'Method',
+                'Status',
+                'Transaction ID',
+                'Date',
+            ]);
+
+            foreach ($payments as $payment) {
+                $date = $payment->refunded_at
+                    ?? $payment->paid_at
+                    ?? $payment->created_at;
+
+                fputcsv($handle, [
+                    'PAY-' . $payment->payment_id,
+                    $payment->booking->display_reference,
+                    $payment->booking->child->full_name,
+                    $payment->booking->service->name,
+                    number_format((float) $payment->amount, 2, '.', ''),
+                    str_replace('-', ' ', $payment->payment_method),
+                    $payment->display_status,
+                    $payment->transaction_id ?? '',
+                    $date?->format('Y-m-d H:i:s') ?? '',
+                ]);
+            }
+
+            fclose($handle);
+        }, $fileName, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+        ]);
     }
 
     public function create(Request $request, Booking $booking)

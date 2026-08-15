@@ -1,59 +1,165 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# LittleNest
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+LittleNest is a Laravel-based child care service, booking and child activity monitoring system developed for CSE391.
 
-## About Laravel
+## Technology
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- Laravel 12
+- PHP 8.2+
+- MySQL
+- Blade
+- Tailwind CSS and Vite
+- Vanilla JavaScript where needed
+- XAMPP for local development
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Roles
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### Parent
 
-## Learning Laravel
+Parents can register, manage their profile and children, browse services, select available time slots, create bookings, filter booking history, request reschedule or cancellation, view assigned caregivers, follow child activities, download activity summaries, make simulated payments, view receipts and export payment history.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+### Caregiver
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Caregivers can login using accounts created by Admin, manage their professional profile, see assigned children and schedules, add or edit care activity updates, review activity history and complete confirmed care assignments.
 
-## Laravel Sponsors
+### Admin
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+Admin can manage parents, children, caregivers, services, time slots, bookings, caregiver assignments, booking requests, filtered activity monitoring, payments, refunds, inquiries and reports.
 
-### Premium Partners
+## Main Workflow
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+Parent registers or logs in.
 
-## Contributing
+Parent adds a child.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Parent chooses a service and an available time slot.
 
-## Code of Conduct
+A Pending booking is created.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Admin confirms or rejects the booking.
 
-## Security Vulnerabilities
+Admin assigns an available caregiver.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Caregiver records activity updates.
 
-## License
+Parent sees caregiver and activity information.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Caregiver completes the care assignment.
+
+Payment and booking history remain available.
+
+## Local Setup
+
+Place the project in:
+
+```text
+C:\xampp\htdocs\LittleNest
+```
+
+Open Command Prompt:
+
+```bat
+cd C:\xampp\htdocs\LittleNest
+composer install
+npm install
+```
+
+Create `.env` from `.env.example` if needed:
+
+```bat
+copy .env.example .env
+php artisan key:generate
+```
+
+Create a MySQL database named:
+
+```text
+littlenest
+```
+
+Update the MySQL settings in `.env`.
+
+Then run:
+
+```bat
+php artisan optimize:clear
+php artisan migrate
+php artisan storage:link
+npm run build
+php artisan serve
+```
+
+If you want the default Admin account and the six demo services, run this once:
+
+```bat
+php artisan db:seed
+```
+
+The seeders use `updateOrCreate`, so running them again updates the same Admin and service records instead of creating duplicates.
+
+Open:
+
+```text
+http://127.0.0.1:8000
+```
+
+## Default Admin Account
+
+After running `php artisan db:seed`:
+
+```text
+Email: admin@littlenest.test
+Password: password123
+```
+
+Change the password if the project is used beyond local demonstration.
+
+## Password Reset
+
+Password reset uses Laravel's password broker.
+
+For local development, if the mail driver is set to `log`, reset emails are written to:
+
+```text
+storage/logs/laravel.log
+```
+
+## Reports
+
+Admin reports support date filtering, booking CSV export, service usage, caregiver workload, revenue and refund summaries.
+
+The Export PDF button opens a print-ready report. Choose `Save as PDF` from the browser print dialog.
+
+## Testing
+
+Run:
+
+```bat
+php artisan test
+```
+
+Before a Git commit, also run:
+
+```bat
+php artisan optimize:clear
+php artisan migrate:status
+php artisan route:list
+php artisan test
+git status
+```
+
+## Security
+
+LittleNest uses Laravel authentication, CSRF protection, password hashing, validation, Eloquent parameter binding and backend role or ownership checks.
+
+Parents can only access their own records.
+
+Caregivers can only access assignments and activities related to them.
+
+Admin-only pages verify the Admin role in backend controller logic.
+
+## Git Repository
+
+```text
+https://github.com/Nasrul-Rafi/LittleNest.git
+```

@@ -17,18 +17,87 @@ class AdminReportController extends Controller
     {
         $this->adminOnly($request);
 
-        $validated = $request->validate([
-            'from_date' => ['nullable', 'date'],
-            'to_date' => [
-                'nullable',
-                'date',
-                'after_or_equal:from_date',
-            ],
+        $filters = $this->validatedFilters($request);
+        $data = $this->reportData(
+            $filters['from_date'] ?? null,
+            $filters['to_date'] ?? null
+        );
+
+        return view('admin.reports.index', $data);
+    }
+
+    public function print(Request $request)
+    {
+        $this->adminOnly($request);
+
+        $filters = $this->validatedFilters($request);
+        $data = $this->reportData(
+            $filters['from_date'] ?? null,
+            $filters['to_date'] ?? null
+        );
+
+        return view('admin.reports.print', $data);
+    }
+
+    public function exportBookings(Request $request): StreamedResponse
+    {
+        $this->adminOnly($request);
+
+        $validated = $this->validatedFilters($request);
+
+        $bookings = Booking::with([
+            'child.parentProfile.user',
+            'service',
         ]);
 
-        $fromDate = $validated['from_date'] ?? null;
-        $toDate = $validated['to_date'] ?? null;
+        $this->applyDateRange(
+            $bookings,
+            'booking_date',
+            $validated['from_date'] ?? null,
+            $validated['to_date'] ?? null
+        );
 
+        $bookings = $bookings
+            ->orderBy('booking_id')
+            ->get();
+
+        return response()->streamDownload(function () use ($bookings) {
+            $handle = fopen('php://output', 'w');
+
+            fputcsv($handle, [
+                'Booking Reference',
+                'Parent',
+                'Child',
+                'Service',
+                'Date',
+                'Time',
+                'Status',
+                'Amount',
+            ]);
+
+            foreach ($bookings as $booking) {
+                fputcsv($handle, [
+                    $booking->display_reference,
+                    $booking->child->parentProfile->user->name,
+                    $booking->child->full_name,
+                    $booking->service->name,
+                    $booking->booking_date->format('Y-m-d'),
+                    $booking->booking_time,
+                    $booking->status,
+                    $booking->total_amount,
+                ]);
+            }
+
+            fclose($handle);
+        }, 'littlenest-bookings.csv', [
+            'Content-Type' => 'text/csv',
+        ]);
+    }
+
+    private function reportData(
+        ?string $fromDate,
+        ?string $toDate
+    ): array {
         $bookingQuery = Booking::query();
         $this->applyDateRange(
             $bookingQuery,
@@ -85,6 +154,26 @@ class AdminReportController extends Controller
             ->orderByDesc('bookings_count')
             ->get();
 
+        $caregiverWorkload = User::where('role', 'caregiver')
+            ->where('status', 'active')
+            ->withCount([
+                'caregiverAssignments as workload_count' => function ($query) use ($fromDate, $toDate) {
+                    if ($fromDate || $toDate) {
+                        $query->whereHas('booking', function ($bookingQuery) use ($fromDate, $toDate) {
+                            $this->applyDateRange(
+                                $bookingQuery,
+                                'booking_date',
+                                $fromDate,
+                                $toDate
+                            );
+                        });
+                    }
+                },
+            ])
+            ->orderByDesc('workload_count')
+            ->orderBy('name')
+            ->get();
+
         $recentPayments = Payment::with([
             'booking.child.parentProfile.user',
             'booking.service',
@@ -102,74 +191,26 @@ class AdminReportController extends Controller
             ->take(10)
             ->get();
 
-        return view('admin.reports.index', compact(
-            'summary',
-            'serviceUsage',
-            'recentPayments',
-            'fromDate',
-            'toDate'
-        ));
+        return [
+            'summary' => $summary,
+            'serviceUsage' => $serviceUsage,
+            'caregiverWorkload' => $caregiverWorkload,
+            'recentPayments' => $recentPayments,
+            'topService' => $serviceUsage->first(),
+            'fromDate' => $fromDate,
+            'toDate' => $toDate,
+        ];
     }
 
-    public function exportBookings(Request $request): StreamedResponse
+    private function validatedFilters(Request $request): array
     {
-        $this->adminOnly($request);
-
-        $validated = $request->validate([
+        return $request->validate([
             'from_date' => ['nullable', 'date'],
             'to_date' => [
                 'nullable',
                 'date',
                 'after_or_equal:from_date',
             ],
-        ]);
-
-        $bookings = Booking::with([
-            'child.parentProfile.user',
-            'service',
-        ]);
-
-        $this->applyDateRange(
-            $bookings,
-            'booking_date',
-            $validated['from_date'] ?? null,
-            $validated['to_date'] ?? null
-        );
-
-        $bookings = $bookings
-            ->orderBy('booking_id')
-            ->get();
-
-        return response()->streamDownload(function () use ($bookings) {
-            $handle = fopen('php://output', 'w');
-
-            fputcsv($handle, [
-                'Booking Reference',
-                'Parent',
-                'Child',
-                'Service',
-                'Date',
-                'Time',
-                'Status',
-                'Amount',
-            ]);
-
-            foreach ($bookings as $booking) {
-                fputcsv($handle, [
-                    $booking->display_reference,
-                    $booking->child->parentProfile->user->name,
-                    $booking->child->full_name,
-                    $booking->service->name,
-                    $booking->booking_date->format('Y-m-d'),
-                    $booking->booking_time,
-                    $booking->status,
-                    $booking->total_amount,
-                ]);
-            }
-
-            fclose($handle);
-        }, 'littlenest-bookings.csv', [
-            'Content-Type' => 'text/csv',
         ]);
     }
 

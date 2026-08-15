@@ -11,13 +11,13 @@ class AdminSeeder extends Seeder
     public function run(): void
     {
         User::updateOrCreate(
-            [
-                'email' => 'admin@littlenest.test',
-            ],
+            ['email' => 'admin@littlenest.test'],
             [
                 'name' => 'LittleNest Admin',
+                'phone' => '01700000000',
                 'password' => Hash::make('password123'),
                 'role' => 'admin',
+                'status' => 'active',
             ]
         );
     }

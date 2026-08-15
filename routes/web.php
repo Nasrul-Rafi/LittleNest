@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminBookingController;
+use App\Http\Controllers\AdminAssignmentController;
 use App\Http\Controllers\AdminActivityController;
 use App\Http\Controllers\AdminChildController;
 use App\Http\Controllers\AdminInquiryController;
@@ -23,6 +24,7 @@ use App\Http\Controllers\CaregiverAssignmentController;
 use App\Http\Controllers\CaregiverProfileController;
 use App\Http\Controllers\CaregiverScheduleController;
 use App\Http\Controllers\ChildController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\ParentProfileController;
@@ -62,13 +64,8 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::middleware('auth')->group(function () {
-    Route::get('/dashboard', function () {
-        if (auth()->user()->role === 'admin') {
-            return redirect()->route('admin.dashboard');
-        }
-
-        return view('dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])
+        ->name('dashboard');
 
     Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])
         ->name('admin.dashboard');
@@ -103,8 +100,29 @@ Route::middleware('auth')->group(function () {
     Route::get('/admin/parents', [AdminParentController::class, 'index'])
         ->name('admin.parents.index');
 
+    Route::get('/admin/parents/create', [AdminParentController::class, 'create'])
+        ->name('admin.parents.create');
+
+    Route::post('/admin/parents', [AdminParentController::class, 'store'])
+        ->name('admin.parents.store');
+
     Route::get('/admin/parents/{parent}', [AdminParentController::class, 'show'])
         ->name('admin.parents.show');
+
+    Route::get('/admin/parents/{parent}/edit', [AdminParentController::class, 'edit'])
+        ->name('admin.parents.edit');
+
+    Route::post('/admin/parents/{parent}/update', [AdminParentController::class, 'update'])
+        ->name('admin.parents.update');
+
+    Route::post('/admin/parents/{parent}/status', [AdminParentController::class, 'changeStatus'])
+        ->name('admin.parents.status');
+
+    Route::get('/admin/assignments', [AdminAssignmentController::class, 'index'])
+        ->name('admin.assignments.index');
+
+    Route::get('/admin/assignments/{assignment}', [AdminAssignmentController::class, 'show'])
+        ->name('admin.assignments.show');
 
     Route::get('/admin/children', [AdminChildController::class, 'index'])
         ->name('admin.children.index');
@@ -123,6 +141,9 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/admin/reports/bookings.csv', [AdminReportController::class, 'exportBookings'])
         ->name('admin.reports.bookings-csv');
+
+    Route::get('/admin/reports/print', [AdminReportController::class, 'print'])
+        ->name('admin.reports.print');
 
     Route::get('/admin/inquiries', [AdminInquiryController::class, 'index'])
         ->name('admin.inquiries.index');
@@ -247,6 +268,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/activities', [ParentActivityController::class, 'index'])
         ->name('activities.index');
 
+    Route::get('/activities/summary.csv', [ParentActivityController::class, 'summary'])
+        ->name('activities.summary');
+
     Route::get('/activities/{activity}', [ParentActivityController::class, 'show'])
         ->name('activities.show');
 
@@ -255,6 +279,9 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/payments', [PaymentController::class, 'index'])
         ->name('payments.index');
+
+    Route::get('/payments/export.csv', [PaymentController::class, 'export'])
+        ->name('payments.export');
 
     Route::get('/bookings/{booking}/payment', [PaymentController::class, 'create'])
         ->name('payments.create');

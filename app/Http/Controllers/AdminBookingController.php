@@ -14,16 +14,52 @@ class AdminBookingController extends Controller
             abort(403);
         }
 
-        $bookings = Booking::with([
+        $query = Booking::with([
             'child.parentProfile.user',
             'service',
             'timeSlot',
             'caregiverAssignment.caregiver',
-        ])
-            ->orderBy('booking_date', 'desc')
+        ]);
+
+        $search = trim((string) $request->input('search'));
+        $status = $request->input('status');
+        $bookingDate = $request->input('booking_date');
+
+        if ($search !== '') {
+            $query->where(function ($bookingQuery) use ($search) {
+                $bookingQuery
+                    ->where('booking_reference', 'like', '%' . $search . '%')
+                    ->orWhereHas('child', function ($childQuery) use ($search) {
+                        $childQuery->where('full_name', 'like', '%' . $search . '%');
+                    })
+                    ->orWhereHas('child.parentProfile.user', function ($userQuery) use ($search) {
+                        $userQuery->where('name', 'like', '%' . $search . '%');
+                    })
+                    ->orWhereHas('service', function ($serviceQuery) use ($search) {
+                        $serviceQuery->where('name', 'like', '%' . $search . '%');
+                    });
+            });
+        }
+
+        if (in_array($status, ['pending', 'confirmed', 'completed', 'cancelled'], true)) {
+            $query->where('status', $status);
+        }
+
+        if ($bookingDate) {
+            $query->whereDate('booking_date', $bookingDate);
+        }
+
+        $bookings = $query
+            ->orderByDesc('booking_date')
+            ->orderByDesc('booking_id')
             ->get();
 
-        return view('admin.bookings.index', compact('bookings'));
+        return view('admin.bookings.index', compact(
+            'bookings',
+            'search',
+            'status',
+            'bookingDate'
+        ));
     }
 
     public function show(Request $request, Booking $booking)

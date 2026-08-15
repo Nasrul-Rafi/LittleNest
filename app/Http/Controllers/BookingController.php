@@ -16,13 +16,49 @@ class BookingController extends Controller
     {
         $parentProfile = $this->getParentProfile($request);
 
-        $bookings = $parentProfile->bookings()
-            ->with(['child', 'service', 'timeSlot'])
+        $query = $parentProfile->bookings()
+            ->with(['child', 'service', 'timeSlot']);
+
+        $search = trim((string) $request->input('search'));
+        $status = $request->input('status');
+        $month = $request->input('month');
+
+        if ($search !== '') {
+            $query->where(function ($bookingQuery) use ($search) {
+                $bookingQuery
+                    ->where('booking_reference', 'like', '%' . $search . '%')
+                    ->orWhereHas('child', function ($childQuery) use ($search) {
+                        $childQuery->where('full_name', 'like', '%' . $search . '%');
+                    })
+                    ->orWhereHas('service', function ($serviceQuery) use ($search) {
+                        $serviceQuery->where('name', 'like', '%' . $search . '%');
+                    });
+            });
+        }
+
+        if (in_array($status, ['pending', 'confirmed', 'completed', 'cancelled'], true)) {
+            $query->where('bookings.status', $status);
+        }
+
+        if (is_string($month) && preg_match('/^\d{4}-\d{2}$/', $month)) {
+            [$year, $monthNumber] = array_map('intval', explode('-', $month));
+
+            $query->whereYear('booking_date', $year)
+                ->whereMonth('booking_date', $monthNumber);
+        }
+
+        $bookings = $query
             ->latest('booking_date')
             ->latest('booking_time')
-            ->get();
+            ->paginate(8)
+            ->withQueryString();
 
-        return view('bookings.index', compact('bookings'));
+        return view('bookings.index', compact(
+            'bookings',
+            'search',
+            'status',
+            'month'
+        ));
     }
 
     public function create(Request $request): View
