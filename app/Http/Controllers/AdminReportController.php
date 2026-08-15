@@ -7,6 +7,7 @@ use App\Models\ChildActivity;
 use App\Models\Payment;
 use App\Models\Service;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -16,25 +17,87 @@ class AdminReportController extends Controller
     {
         $this->adminOnly($request);
 
+        $validated = $request->validate([
+            'from_date' => ['nullable', 'date'],
+            'to_date' => [
+                'nullable',
+                'date',
+                'after_or_equal:from_date',
+            ],
+        ]);
+
+        $fromDate = $validated['from_date'] ?? null;
+        $toDate = $validated['to_date'] ?? null;
+
+        $bookingQuery = Booking::query();
+        $this->applyDateRange(
+            $bookingQuery,
+            'booking_date',
+            $fromDate,
+            $toDate
+        );
+
+        $paymentQuery = Payment::query();
+        $this->applyDateRange(
+            $paymentQuery,
+            'created_at',
+            $fromDate,
+            $toDate
+        );
+
+        $activityQuery = ChildActivity::query();
+        $this->applyDateRange(
+            $activityQuery,
+            'activity_time',
+            $fromDate,
+            $toDate
+        );
+
         $summary = [
-            'total_bookings' => Booking::count(),
-            'completed_bookings' => Booking::where('status', 'completed')->count(),
-            'paid_revenue' => Payment::where('payment_status', 'paid')->sum('amount'),
-            'activity_updates' => ChildActivity::count(),
+            'total_bookings' => (clone $bookingQuery)->count(),
+            'completed_bookings' => (clone $bookingQuery)
+                ->where('status', 'completed')
+                ->count(),
+            'paid_revenue' => (clone $paymentQuery)
+                ->where('payment_status', 'paid')
+                ->whereNull('refunded_at')
+                ->sum('amount'),
+            'refunded_amount' => (clone $paymentQuery)
+                ->whereNotNull('refunded_at')
+                ->sum('refund_amount'),
+            'activity_updates' => (clone $activityQuery)->count(),
             'active_services' => Service::where('status', 'active')->count(),
             'active_caregivers' => User::where('role', 'caregiver')
                 ->where('status', 'active')
                 ->count(),
         ];
 
-        $serviceUsage = Service::withCount('bookings')
+        $serviceUsage = Service::withCount([
+            'bookings' => function ($query) use ($fromDate, $toDate) {
+                $this->applyDateRange(
+                    $query,
+                    'booking_date',
+                    $fromDate,
+                    $toDate
+                );
+            },
+        ])
             ->orderByDesc('bookings_count')
             ->get();
 
         $recentPayments = Payment::with([
             'booking.child.parentProfile.user',
             'booking.service',
-        ])
+        ]);
+
+        $this->applyDateRange(
+            $recentPayments,
+            'created_at',
+            $fromDate,
+            $toDate
+        );
+
+        $recentPayments = $recentPayments
             ->latest('payment_id')
             ->take(10)
             ->get();
@@ -42,7 +105,9 @@ class AdminReportController extends Controller
         return view('admin.reports.index', compact(
             'summary',
             'serviceUsage',
-            'recentPayments'
+            'recentPayments',
+            'fromDate',
+            'toDate'
         ));
     }
 
@@ -50,10 +115,30 @@ class AdminReportController extends Controller
     {
         $this->adminOnly($request);
 
+        $validated = $request->validate([
+            'from_date' => ['nullable', 'date'],
+            'to_date' => [
+                'nullable',
+                'date',
+                'after_or_equal:from_date',
+            ],
+        ]);
+
         $bookings = Booking::with([
             'child.parentProfile.user',
             'service',
-        ])->orderBy('booking_id')->get();
+        ]);
+
+        $this->applyDateRange(
+            $bookings,
+            'booking_date',
+            $validated['from_date'] ?? null,
+            $validated['to_date'] ?? null
+        );
+
+        $bookings = $bookings
+            ->orderBy('booking_id')
+            ->get();
 
         return response()->streamDownload(function () use ($bookings) {
             $handle = fopen('php://output', 'w');
@@ -86,6 +171,21 @@ class AdminReportController extends Controller
         }, 'littlenest-bookings.csv', [
             'Content-Type' => 'text/csv',
         ]);
+    }
+
+    private function applyDateRange(
+        Builder $query,
+        string $column,
+        ?string $fromDate,
+        ?string $toDate
+    ): void {
+        if ($fromDate) {
+            $query->whereDate($column, '>=', $fromDate);
+        }
+
+        if ($toDate) {
+            $query->whereDate($column, '<=', $toDate);
+        }
     }
 
     private function adminOnly(Request $request): void

@@ -24,6 +24,7 @@ use App\Http\Controllers\CaregiverProfileController;
 use App\Http\Controllers\CaregiverScheduleController;
 use App\Http\Controllers\ChildController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\ParentProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -46,6 +47,18 @@ Route::middleware('guest')->group(function () {
 
     Route::post('/login', [AuthController::class, 'login'])
         ->name('login.store');
+
+    Route::get('/forgot-password', [PasswordResetController::class, 'showForgotForm'])
+        ->name('password.request');
+
+    Route::post('/forgot-password', [PasswordResetController::class, 'sendResetLink'])
+        ->name('password.email');
+
+    Route::get('/reset-password/{token}', [PasswordResetController::class, 'showResetForm'])
+        ->name('password.reset');
+
+    Route::post('/reset-password', [PasswordResetController::class, 'reset'])
+        ->name('password.update');
 });
 
 Route::middleware('auth')->group(function () {
@@ -153,6 +166,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/admin/payments/{payment}/mark-failed', [AdminPaymentController::class, 'markFailed'])
         ->name('admin.payments.mark-failed');
 
+    Route::post('/admin/payments/{payment}/refund', [AdminPaymentController::class, 'refund'])
+        ->name('admin.payments.refund');
+
     Route::get('/admin/services', [AdminServiceController::class, 'index'])
         ->name('admin.services.index');
 
@@ -248,6 +264,9 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/payments/{payment}', [PaymentController::class, 'show'])
         ->name('payments.show');
+
+    Route::get('/payments/{payment}/receipt', [PaymentController::class, 'receipt'])
+        ->name('payments.receipt');
 
     Route::get('/profile', [ParentProfileController::class, 'show'])
         ->name('profile.show');

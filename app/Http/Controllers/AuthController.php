@@ -28,6 +28,7 @@ class AuthController extends Controller
                 'max:255',
                 'unique:users,email',
             ],
+            'phone' => ['required', 'string', 'max:30'],
             'password' => [
                 'required',
                 'string',
@@ -39,6 +40,7 @@ class AuthController extends Controller
         $user = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
+            'phone' => $validated['phone'],
             'password' => Hash::make($validated['password']),
             'role' => 'parent',
         ]);

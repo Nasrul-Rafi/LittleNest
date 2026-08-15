@@ -60,7 +60,6 @@
                     {{ $assignmentCount }}
                 </div>
 
-
                 <p class="muted">
                     Total child-care bookings assigned to you.
                 </p>

@@ -164,8 +164,8 @@
                                 </td>
                                 <td>৳{{ number_format((float) $payment->amount, 2) }}</td>
                                 <td>
-                                    <span class="badge badge-{{ $payment->payment_status }}">
-                                        {{ $payment->payment_status }}
+                                    <span class="badge badge-{{ $payment->display_status }}">
+                                        {{ $payment->display_status }}
                                     </span>
                                 </td>
                             </tr>

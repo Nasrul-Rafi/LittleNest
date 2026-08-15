@@ -32,6 +32,13 @@
             </div>
 
             <div class="detail-item">
+                <span class="detail-label">Phone Number</span>
+                <p class="detail-value">
+                    {{ $caregiverProfile->user->phone ?: 'Not provided' }}
+                </p>
+            </div>
+
+            <div class="detail-item">
                 <span class="detail-label">Account Status</span>
                 <p class="detail-value">
                     <span

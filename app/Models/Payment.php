@@ -19,6 +19,9 @@ class Payment extends Model
         'transaction_id',
         'payment_status',
         'paid_at',
+        'refund_amount',
+        'refunded_at',
+        'refund_note',
     ];
 
     protected function casts(): array
@@ -26,6 +29,8 @@ class Payment extends Model
         return [
             'amount' => 'decimal:2',
             'paid_at' => 'datetime',
+            'refund_amount' => 'decimal:2',
+            'refunded_at' => 'datetime',
         ];
     }
 
@@ -36,5 +41,19 @@ class Payment extends Model
             'booking_id',
             'booking_id'
         );
+    }
+
+    public function getDisplayStatusAttribute(): string
+    {
+        if ($this->refunded_at) {
+            return 'refunded';
+        }
+
+        return $this->payment_status;
+    }
+
+    public function isRefunded(): bool
+    {
+        return $this->refunded_at !== null;
     }
 }

@@ -28,6 +28,17 @@
     </div>
 
     <div class="form-group">
+        <label for="phone">Phone Number</label>
+
+        <input
+            type="text"
+            id="phone"
+            name="phone"
+            value="{{ old('phone', $caregiver->phone ?? '') }}"
+        >
+    </div>
+
+    <div class="form-group">
         <label for="password">
             Password
             @if (!isset($caregiver))

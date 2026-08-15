@@ -37,6 +37,7 @@ class ParentProfileController extends Controller
                 'max:255',
                 Rule::unique('users', 'email')->ignore($user->id),
             ],
+            'phone' => ['nullable', 'string', 'max:30'],
             'address' => ['nullable', 'string', 'max:255'],
             'emergency_contact_name' => [
                 'nullable',
@@ -53,6 +54,7 @@ class ParentProfileController extends Controller
         $user->update([
             'name' => $validated['name'],
             'email' => $validated['email'],
+            'phone' => $validated['phone'] ?? null,
         ]);
 
         $parentProfile->update([

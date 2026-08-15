@@ -16,6 +16,7 @@ class AuthenticationTest extends TestCase
         $response = $this->post(route('register.store'), [
             'name' => 'Test Parent',
             'email' => 'parent@example.com',
+            'phone' => '01700000000',
             'password' => 'password123',
             'password_confirmation' => 'password123',
             'role' => 'admin',
@@ -32,6 +33,7 @@ class AuthenticationTest extends TestCase
 
         $this->assertNotNull($user);
         $this->assertSame('parent', $user->role);
+        $this->assertSame('01700000000', $user->phone);
 
         $this->assertDatabaseHas('parent_profiles', [
             'user_id' => $user->id,

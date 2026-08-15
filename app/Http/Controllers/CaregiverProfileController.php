@@ -43,6 +43,7 @@ class CaregiverProfileController extends Controller
                 'max:255',
                 Rule::unique('users', 'email')->ignore($user->id),
             ],
+            'phone' => ['nullable', 'string', 'max:30'],
             'qualification' => ['required', 'string', 'max:255'],
             'experience_years' => [
                 'required',
@@ -62,6 +63,7 @@ class CaregiverProfileController extends Controller
         $user->update([
             'name' => $validated['name'],
             'email' => $validated['email'],
+            'phone' => $validated['phone'] ?? null,
         ]);
 
         $caregiverProfile->update([

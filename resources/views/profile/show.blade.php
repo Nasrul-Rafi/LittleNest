@@ -28,6 +28,13 @@
                 </p>
             </div>
 
+            <div class="detail-item">
+                <span class="detail-label">Phone Number</span>
+                <p class="detail-value">
+                    {{ $parentProfile->user->phone ?: 'Not provided' }}
+                </p>
+            </div>
+
             <div class="detail-item detail-item-full">
                 <span class="detail-label">Address</span>
                 <p class="detail-value">

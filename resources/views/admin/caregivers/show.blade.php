@@ -38,6 +38,11 @@
             </div>
 
             <div class="detail-item">
+                <span class="detail-label">Phone Number</span>
+                <p class="detail-value">{{ $caregiver->phone ?: 'Not provided' }}</p>
+            </div>
+
+            <div class="detail-item">
                 <span class="detail-label">Qualification</span>
                 <p class="detail-value">
                     {{ $caregiver->caregiverProfile->qualification }}

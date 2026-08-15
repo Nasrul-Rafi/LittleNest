@@ -48,6 +48,17 @@
                     >
                 </div>
 
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+
+                    <input
+                        id="phone"
+                        name="phone"
+                        type="text"
+                        value="{{ old('phone', $parentProfile->user->phone) }}"
+                    >
+                </div>
+
                 <div class="form-group form-group-full">
                     <label for="address">Address</label>
 

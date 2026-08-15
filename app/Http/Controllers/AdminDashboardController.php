@@ -37,6 +37,7 @@ class AdminDashboardController extends Controller
         )->count();
 
         $paidTotal = Payment::where('payment_status', 'paid')
+            ->whereNull('refunded_at')
             ->sum('amount');
 
         $recentBookings = Booking::with([

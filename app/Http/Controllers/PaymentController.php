@@ -18,7 +18,10 @@ class PaymentController extends Controller
 
         $payments = Payment::with(['booking.child', 'booking.service'])
             ->whereHas('booking.child', function ($query) use ($parentProfile) {
-                $query->where('parent_profile_id', $parentProfile->parent_profile_id);
+                $query->where(
+                    'parent_profile_id',
+                    $parentProfile->parent_profile_id
+                );
             })
             ->latest('payment_id')
             ->get();
@@ -42,6 +45,7 @@ class PaymentController extends Controller
 
         if (
             $latestPayment
+            && !$latestPayment->isRefunded()
             && in_array(
                 $latestPayment->payment_status,
                 ['pending', 'paid'],
@@ -72,6 +76,7 @@ class PaymentController extends Controller
 
         if (
             $latestPayment
+            && !$latestPayment->isRefunded()
             && in_array(
                 $latestPayment->payment_status,
                 ['pending', 'paid'],
@@ -125,10 +130,38 @@ class PaymentController extends Controller
 
     public function show(Request $request, Payment $payment)
     {
-        $payment->load('booking.child');
+        $payment->load([
+            'booking.child',
+            'booking.service',
+        ]);
+
         $this->ensureParentOwnership($request, $payment->booking);
 
         return view('payments.show', compact('payment'));
+    }
+
+    public function receipt(Request $request, Payment $payment)
+    {
+        $payment->load([
+            'booking.child.parentProfile.user',
+            'booking.service',
+        ]);
+
+        $this->ensureParentOwnership($request, $payment->booking);
+
+        if (
+            $payment->payment_status !== 'paid'
+            && !$payment->isRefunded()
+        ) {
+            return redirect()
+                ->route('payments.show', $payment)
+                ->with(
+                    'error',
+                    'Receipt is available after the payment is confirmed.'
+                );
+        }
+
+        return view('payments.receipt', compact('payment'));
     }
 
     private function ensureParentOwnership(

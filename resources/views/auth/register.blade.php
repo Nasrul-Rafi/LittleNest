@@ -8,6 +8,7 @@
         <div class="form-grid" style="margin-top:20px;">
             <div><label for="name">Full Name</label><input type="text" id="name" name="name" value="{{ old('name') }}" required></div>
             <div><label for="email">Email Address</label><input type="email" id="email" name="email" value="{{ old('email') }}" required></div>
+            <div><label for="phone">Phone Number</label><input type="text" id="phone" name="phone" value="{{ old('phone') }}" required></div>
             <div><label for="password">Password</label><input type="password" id="password" name="password" required></div>
             <div><label for="password_confirmation">Confirm Password</label><input type="password" id="password_confirmation" name="password_confirmation" required></div>
             <div class="full"><button class="btn btn-primary" style="width:100%" type="submit">Create Account</button></div>

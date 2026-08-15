@@ -166,7 +166,6 @@ class BookingCrudTest extends TestCase
                 'child_id' => $child->child_id,
                 'slot_id' => $timeSlot->slot_id,
 
-                // A dishonest user may add these values.
                 'total_amount' => 1,
                 'status' => 'completed',
             ])

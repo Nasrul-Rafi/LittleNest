@@ -76,18 +76,53 @@ class AdminBookingRequestController extends Controller
         }
 
         if ($bookingRequest->request_type === 'cancellation') {
-            $booking->update(['status' => 'cancelled']);
-        } else {
-            $updated = $this->approveReschedule(
-                $bookingRequest
-            );
+            DB::transaction(function () use (
+                $booking,
+                $bookingRequest,
+                $request,
+                $validated
+            ) {
+                $booking->update(['status' => 'cancelled']);
 
-            if (!$updated) {
-                return back()->with(
-                    'error',
-                    'The requested time slot is no longer available. Ask the parent to choose another slot.'
+                $paidPayments = $booking->payments()
+                    ->where('payment_status', 'paid')
+                    ->whereNull('refunded_at')
+                    ->get();
+
+                foreach ($paidPayments as $payment) {
+                    $payment->update([
+                        'refund_amount' => $payment->amount,
+                        'refunded_at' => now(),
+                        'refund_note' =>
+                            'Automatically refunded after approved cancellation request.',
+                    ]);
+                }
+
+                $bookingRequest->update([
+                    'request_status' => 'approved',
+                    'reviewed_by' => $request->user()->id,
+                    'reviewed_at' => now(),
+                    'admin_note' => $validated['admin_note'] ?? null,
+                ]);
+            });
+
+            return redirect()
+                ->route('admin.booking-requests.show', $bookingRequest)
+                ->with(
+                    'success',
+                    'Cancellation approved. Any paid payment was recorded as refunded.'
                 );
-            }
+        }
+
+        $updated = $this->approveReschedule(
+            $bookingRequest
+        );
+
+        if (!$updated) {
+            return back()->with(
+                'error',
+                'The requested time slot is no longer available. Ask the parent to choose another slot.'
+            );
         }
 
         $bookingRequest->update([

@@ -15,7 +15,7 @@
             <label style="margin-top:16px;display:flex;gap:8px;align-items:center;font-weight:500;"><input style="width:auto" type="checkbox" name="remember" value="1"> Remember me</label>
             <button class="btn btn-primary" style="width:100%;margin-top:20px;" type="submit">Login</button>
         </form>
-        <p class="muted" style="margin-top:18px;">New parent? <a href="{{ route('register') }}">Create a parent account</a></p>
+        <p class="muted" style="margin-top:18px;"><a href="{{ route('password.request') }}">Forgot password?</a> &nbsp;•&nbsp; New parent? <a href="{{ route('register') }}">Create a parent account</a></p>
     </div>
 </div>
 <style>@media(max-width:760px){.form-card{grid-template-columns:1fr!important;}}</style>

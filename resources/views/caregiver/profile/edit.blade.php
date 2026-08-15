@@ -58,6 +58,20 @@
                 </div>
 
                 <div class="form-group">
+                    <label for="phone">Phone Number</label>
+
+                    <input
+                        id="phone"
+                        name="phone"
+                        type="text"
+                        value="{{ old(
+                            'phone',
+                            $caregiverProfile->user->phone
+                        ) }}"
+                    >
+                </div>
+
+                <div class="form-group">
                     <label for="qualification">
                         Qualification <span class="required">*</span>
                     </label>

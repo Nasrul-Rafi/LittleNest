@@ -390,6 +390,11 @@
             background: #ffe3e3;
         }
 
+        .badge-refunded {
+            color: #765b3d;
+            background: #f7efe7;
+        }
+
         .badge-approved {
             color: #087f5b;
             background: #dff7ed;

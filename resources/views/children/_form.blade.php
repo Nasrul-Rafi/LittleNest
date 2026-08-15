@@ -73,7 +73,6 @@
         </select>
     </div>
 
-
     <div class="form-group">
         <label for="guardian_relation">Guardian Relation</label>
         <input type="text" id="guardian_relation" name="guardian_relation" maxlength="50" value="{{ old('guardian_relation', $child?->guardian_relation) }}" placeholder="e.g. Mother, Father">
@@ -126,7 +125,6 @@
             placeholder="Write important medical information."
         >{{ old('medical_notes', $child?->medical_notes) }}</textarea>
     </div>
-
 
     <div class="form-group form-group-full">
         <label for="medicine_instructions">Medicine Instructions</label>

@@ -40,6 +40,7 @@ class AdminCaregiverController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
+            'phone' => ['nullable', 'string', 'max:30'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
             'qualification' => ['required', 'string', 'max:255'],
             'experience_years' => ['required', 'integer', 'min:0', 'max:60'],
@@ -52,6 +53,7 @@ class AdminCaregiverController extends Controller
         $caregiver = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
+            'phone' => $validated['phone'] ?? null,
             'password' => Hash::make($validated['password']),
             'role' => 'caregiver',
             'status' => 'active',
@@ -119,6 +121,7 @@ class AdminCaregiverController extends Controller
                 'max:255',
                 'unique:users,email,' . $caregiver->id,
             ],
+            'phone' => ['nullable', 'string', 'max:30'],
             'password' => ['nullable', 'string', 'min:8', 'confirmed'],
             'qualification' => ['required', 'string', 'max:255'],
             'experience_years' => ['required', 'integer', 'min:0', 'max:60'],
@@ -130,6 +133,7 @@ class AdminCaregiverController extends Controller
 
         $caregiver->name = $validated['name'];
         $caregiver->email = $validated['email'];
+        $caregiver->phone = $validated['phone'] ?? null;
 
         if (!empty($validated['password'])) {
             $caregiver->password = Hash::make($validated['password']);

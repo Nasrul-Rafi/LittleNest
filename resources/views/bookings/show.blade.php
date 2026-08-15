@@ -273,8 +273,8 @@
                                 </td>
                                 <td>{{ $payment->transaction_id ?: 'Not required' }}</td>
                                 <td>
-                                    <span class="badge badge-{{ $payment->payment_status }}">
-                                        {{ $payment->payment_status }}
+                                    <span class="badge badge-{{ $payment->display_status }}">
+                                        {{ $payment->display_status }}
                                     </span>
                                 </td>
                                 <td>{{ $payment->created_at->format('d M Y, h:i A') }}</td>
