@@ -1,73 +1,125 @@
 # LittleNest
 
-LittleNest is a Laravel-based child care service, booking and child activity monitoring system developed for CSE391.
+LittleNest is a child care service, booking, and child activity monitoring system developed for the CSE391 course.
 
-## Technology
+The system is built with Laravel and provides separate features for Parents, Caregivers, and Admin users.
+
+## Technologies Used
 
 - Laravel 12
 - PHP 8.2+
 - MySQL
 - Blade
-- Tailwind CSS and Vite
-- Vanilla JavaScript where needed
+- Tailwind CSS
+- Vite
+- Vanilla JavaScript
 - XAMPP for local development
 
-## Roles
+## User Roles
 
 ### Parent
 
-Parents can register, manage their profile and children, browse services, select available time slots, create bookings, filter booking history, request reschedule or cancellation, view assigned caregivers, follow child activities, download activity summaries, make simulated payments, view receipts and export payment history.
+Parents can:
+
+- Register and login
+- Manage their profile
+- Add and manage children
+- Browse child care services
+- View available time slots
+- Create bookings
+- View and filter booking history
+- Request booking cancellation or rescheduling
+- View assigned caregivers
+- Follow child activity updates
+- View activity details
+- Export child activity summaries
+- Make simulated payments
+- View receipts and payment history
+- Export payment history
 
 ### Caregiver
 
-Caregivers can login using accounts created by Admin, manage their professional profile, see assigned children and schedules, add or edit care activity updates, review activity history and complete confirmed care assignments.
+Caregivers can:
+
+- Login using accounts created by Admin
+- Manage their professional profile
+- View assigned children and bookings
+- View their care schedule
+- Add child activity updates
+- Edit their own activity updates
+- View activity history
+- Complete assigned care sessions
 
 ### Admin
 
-Admin can manage parents, children, caregivers, services, time slots, bookings, caregiver assignments, booking requests, filtered activity monitoring, payments, refunds, inquiries and reports.
+Admin can:
+
+- Manage Parents
+- Manage Children
+- Manage Caregivers
+- Manage Services
+- Manage Time Slots
+- Manage Bookings
+- Confirm or reject bookings
+- Assign Caregivers to bookings
+- Manage cancellation and reschedule requests
+- Monitor child activities
+- Manage payments and refunds
+- Manage contact inquiries
+- View and filter reports
+- Export booking reports as CSV
+- View service usage and caregiver workload
+- View revenue and refund summaries
+- Open print-ready reports for PDF saving
 
 ## Main Workflow
 
-Parent registers or logs in.
+The main workflow of LittleNest is:
 
-Parent adds a child.
-
-Parent chooses a service and an available time slot.
-
-A Pending booking is created.
-
-Admin confirms or rejects the booking.
-
-Admin assigns an available caregiver.
-
-Caregiver records activity updates.
-
-Parent sees caregiver and activity information.
-
-Caregiver completes the care assignment.
-
-Payment and booking history remain available.
+1. A Parent registers or logs in.
+2. The Parent adds a child profile.
+3. The Parent selects a child care service.
+4. The Parent chooses an available time slot.
+5. A Pending booking is created.
+6. Admin reviews the booking.
+7. Admin confirms or rejects the booking.
+8. Admin assigns an available Caregiver to a confirmed booking.
+9. The Caregiver views the assigned child and schedule.
+10. The Caregiver records activity updates during the care session.
+11. The Parent can view the assigned Caregiver and activity information.
+12. The Caregiver completes the care assignment.
+13. Booking, activity, and payment history remain available in the system.
 
 ## Local Setup
 
-Place the project in:
+Place the project inside the XAMPP `htdocs` folder:
 
 ```text
 C:\xampp\htdocs\LittleNest
 ```
 
-Open Command Prompt:
+Open Command Prompt and go to the project folder:
 
 ```bat
 cd C:\xampp\htdocs\LittleNest
+```
+
+Install the required dependencies:
+
+```bat
 composer install
 npm install
 ```
 
-Create `.env` from `.env.example` if needed:
+Create the `.env` file from `.env.example` if needed:
 
 ```bat
 copy .env.example .env
+```
+
+Generate the Laravel application key:
+
+```bat
 php artisan key:generate
 ```
 
@@ -77,7 +129,7 @@ Create a MySQL database named:
 littlenest
 ```
 
-Update the MySQL settings in `.env`.
+Update the database settings in the `.env` file according to your local MySQL configuration.
 
 Then run:
 
@@ -86,59 +138,204 @@ php artisan optimize:clear
 php artisan migrate
 php artisan storage:link
 npm run build
+```
+
+Start the Laravel development server:
+
+```bat
 php artisan serve
 ```
 
-If you want the default Admin account and the six demo services, run this once:
-
-```bat
-php artisan db:seed
-```
-
-The seeders use `updateOrCreate`, so running them again updates the same Admin and service records instead of creating duplicates.
-
-Open:
+Open the project in a browser:
 
 ```text
 http://127.0.0.1:8000
 ```
 
+## Demo Data
+
+LittleNest includes Laravel seeders for creating demonstration data.
+
+Run:
+
+```bat
+php artisan db:seed
+```
+
+The seeders create data for the main parts of the system, including:
+
+- Admin
+- Parents
+- Parent profiles
+- Caregivers
+- Caregiver profiles
+- Children
+- Services
+- Time slots
+- Bookings
+- Caregiver assignments
+- Child activities
+- Payments
+- Booking requests
+- Contact inquiries
+
+This data is intended for local development, testing, project demonstration, and viva purposes.
+
 ## Default Admin Account
 
-After running `php artisan db:seed`:
+After running:
+
+```bat
+php artisan db:seed
+```
+
+the demo Admin account can be used to access the Admin panel.
 
 ```text
 Email: admin@littlenest.test
-Password: password123
+Password: 12345678
 ```
 
-Change the password if the project is used beyond local demonstration.
+This account is intended only for local development and project demonstration.
+
+Do not use these credentials for a real production deployment.
 
 ## Password Reset
 
-Password reset uses Laravel's password broker.
+LittleNest uses Laravel's password reset system.
 
-For local development, if the mail driver is set to `log`, reset emails are written to:
+For local development, if the mail driver is configured as `log`, password reset emails can be checked from:
 
 ```text
 storage/logs/laravel.log
 ```
 
+## Booking and Time Slot System
+
+Parents select an available time slot while creating a booking.
+
+Each time slot contains information such as:
+
+- Service
+- Date
+- Start time
+- End time
+- Capacity
+- Status
+
+The system checks the available capacity before allowing a booking.
+
+Pending and Confirmed bookings are considered when calculating occupied capacity, while Cancelled bookings do not keep a slot occupied.
+
+## Caregiver Assignment
+
+Admin can assign an available Caregiver to a confirmed booking.
+
+The assigned Caregiver can view the child, booking information, and schedule.
+
+Parents can also view the Caregiver assigned to their booking.
+
+## Child Activity Monitoring
+
+Caregivers can record activity updates during a child care session.
+
+Activity records may include information such as:
+
+- Check-in
+- Meals
+- Learning activities
+- Play activities
+- Rest or nap
+- Health updates
+- Medicine information
+- Behaviour or mood
+- Other care notes
+
+Parents can view activity information related to their own children.
+
+Admin can also monitor child activities using the available filters.
+
+## Payments and Refunds
+
+LittleNest includes a simulated payment system for project demonstration.
+
+Payment records can include:
+
+- Pending payments
+- Paid payments
+- Failed payments
+
+The system also supports refund information for eligible cancelled bookings.
+
+Parents can view their payment history and receipts.
+
+Admin can manage payments and refunds.
+
+## Booking Requests
+
+Parents can submit:
+
+- Cancellation requests
+- Reschedule requests
+
+Admin can review these requests and either approve or reject them.
+
+Request history and Admin review information remain available in the system.
+
 ## Reports
 
-Admin reports support date filtering, booking CSV export, service usage, caregiver workload, revenue and refund summaries.
+The Admin report section provides information such as:
 
-The Export PDF button opens a print-ready report. Choose `Save as PDF` from the browser print dialog.
+- Booking statistics
+- Service usage
+- Caregiver workload
+- Revenue summary
+- Refund summary
+- Date-based report filtering
+
+Booking report data can be exported as CSV.
+
+The PDF report option opens a print-ready page, which can be saved using the browser's `Save as PDF` option.
+
+## Contact Inquiries
+
+Visitors can send inquiries through the public contact page.
+
+Admin can view and manage submitted inquiries from the Admin panel.
+
+## Security
+
+LittleNest uses Laravel's built-in security features and backend access control.
+
+The project includes:
+
+- Password hashing
+- CSRF protection
+- Form validation
+- Laravel authentication
+- Eloquent database queries
+- Role-based access control
+- Ownership checks
+
+Parents can only access their own children, bookings, payments, and activity information.
+
+Caregivers can only access assignments and activity information related to them.
+
+Admin-only pages verify the Admin role before allowing access.
+
+Sensitive local configuration such as database credentials should be stored in the `.env` file.
+
+The `.env` file should not be uploaded to GitHub.
 
 ## Testing
 
-Run:
+Run the project tests using:
 
 ```bat
 php artisan test
 ```
 
-Before a Git commit, also run:
+Before committing major changes, the following commands can also be used:
 
 ```bat
 php artisan optimize:clear
@@ -148,18 +345,16 @@ php artisan test
 git status
 ```
 
-## Security
-
-LittleNest uses Laravel authentication, CSRF protection, password hashing, validation, Eloquent parameter binding and backend role or ownership checks.
-
-Parents can only access their own records.
-
-Caregivers can only access assignments and activities related to them.
-
-Admin-only pages verify the Admin role in backend controller logic.
-
 ## Git Repository
 
 ```text
 https://github.com/Nasrul-Rafi/LittleNest.git
 ```
+
+## Project Note
+
+LittleNest was developed as an academic project for CSE391.
+
+The current system focuses on child care service management, booking, caregiver assignment, child activity monitoring, payments, and administrative management.
+
+The payment process used in this project is simulated for demonstration purposes.
