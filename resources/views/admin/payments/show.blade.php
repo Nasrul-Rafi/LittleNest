@@ -53,7 +53,7 @@
 
             <div class="detail-item">
                 <span class="detail-label">Method</span>
-                <p class="detail-value">{{ ucwords(str_replace('-', ' ', $payment->payment_method)) }}</p>
+                <p class="detail-value">{{ $payment->display_method }}</p>
             </div>
 
             <div class="detail-item">

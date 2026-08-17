@@ -3,8 +3,8 @@
 <div class="form-card" style="max-width:980px;padding:0;overflow:hidden;display:grid;grid-template-columns:.9fr 1.1fr;">
     <div style="padding:42px;background:#E8F0EC;">
         <div class="eyebrow">Welcome back</div>
-        <h2 style="font-size:38px;margin-top:10px;">Care stays clearer when everyone sees the right information.</h2>
-        <p class="muted">Parents, caregivers and admins use one secure LittleNest login, then access only the records allowed for their role.</p>
+        <h2 style="font-size:38px;margin-top:10px;">Better care, made simple.</h2>
+        <p class="muted">Book care and stay close to every little update.</p>
     </div>
     <div style="padding:42px;">
         <h2>Sign in to LittleNest</h2>

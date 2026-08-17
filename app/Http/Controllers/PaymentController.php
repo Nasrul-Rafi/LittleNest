@@ -76,7 +76,7 @@ class PaymentController extends Controller
                     $payment->booking->child->full_name,
                     $payment->booking->service->name,
                     number_format((float) $payment->amount, 2, '.', ''),
-                    str_replace('-', ' ', $payment->payment_method),
+                    $payment->display_method,
                     $payment->display_status,
                     $payment->transaction_id ?? '',
                     $date?->format('Y-m-d H:i:s') ?? '',
@@ -99,19 +99,7 @@ class PaymentController extends Controller
                 ->with('error', 'Payment is available only for confirmed bookings.');
         }
 
-        $latestPayment = $booking->payments()
-            ->latest('payment_id')
-            ->first();
-
-        if (
-            $latestPayment
-            && !$latestPayment->isRefunded()
-            && in_array(
-                $latestPayment->payment_status,
-                ['pending', 'paid'],
-                true
-            )
-        ) {
+        if ($this->hasActivePayment($booking)) {
             return redirect()
                 ->route('bookings.show', $booking)
                 ->with('error', 'This booking already has an active payment.');
@@ -130,61 +118,42 @@ class PaymentController extends Controller
                 ->with('error', 'Payment is available only for confirmed bookings.');
         }
 
-        $latestPayment = $booking->payments()
-            ->latest('payment_id')
-            ->first();
-
-        if (
-            $latestPayment
-            && !$latestPayment->isRefunded()
-            && in_array(
-                $latestPayment->payment_status,
-                ['pending', 'paid'],
-                true
-            )
-        ) {
+        if ($this->hasActivePayment($booking)) {
             return redirect()
                 ->route('bookings.show', $booking)
                 ->with('error', 'This booking already has an active payment.');
         }
 
-        $validated = $request->validate([
-            'payment_method' => [
-                'required',
-                'in:cash,card,mobile-banking',
-            ],
-            'transaction_id' => [
-                'nullable',
-                'string',
-                'max:100',
-                'unique:payments,transaction_id',
-            ],
+        $request->validate([
+            'payment_method' => ['required', 'in:mobile-banking'],
+            'mobile_number' => ['required', 'regex:/^01[3-9][0-9]{8}$/'],
+            'demo_confirmation' => ['accepted'],
+        ], [
+            'mobile_number.regex' => 'Enter a valid 11 digit Bangladeshi mobile number.',
+            'demo_confirmation.accepted' => 'Please confirm that you understand this is a demo payment.',
         ]);
-
-        if (
-            $validated['payment_method'] !== 'cash'
-            && empty($validated['transaction_id'])
-        ) {
-            return back()
-                ->withErrors([
-                    'transaction_id' =>
-                        'Transaction ID is required for card or mobile banking.',
-                ])
-                ->withInput();
-        }
 
         $payment = $booking->payments()->create([
             'amount' => $booking->total_amount,
-            'payment_method' => $validated['payment_method'],
-            'transaction_id' => $validated['transaction_id'] ?? null,
-            'payment_status' => 'pending',
+            'payment_method' => 'mobile-banking',
+            'transaction_id' => null,
+            'payment_status' => 'paid',
+            'paid_at' => now(),
         ]);
+
+        $payment->transaction_id = 'SIM-LN-' . str_pad(
+            (string) $payment->payment_id,
+            6,
+            '0',
+            STR_PAD_LEFT
+        );
+        $payment->save();
 
         return redirect()
             ->route('payments.show', $payment)
             ->with(
                 'success',
-                'Payment submitted successfully. Admin confirmation is pending.'
+                'Demo payment completed successfully. No real money was charged.'
             );
     }
 
@@ -222,6 +191,21 @@ class PaymentController extends Controller
         }
 
         return view('payments.receipt', compact('payment'));
+    }
+
+    private function hasActivePayment(Booking $booking): bool
+    {
+        $latestPayment = $booking->payments()
+            ->latest('payment_id')
+            ->first();
+
+        return $latestPayment
+            && !$latestPayment->isRefunded()
+            && in_array(
+                $latestPayment->payment_status,
+                ['pending', 'paid'],
+                true
+            );
     }
 
     private function ensureParentOwnership(

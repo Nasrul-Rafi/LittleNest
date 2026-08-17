@@ -15,7 +15,7 @@ class AdminSeeder extends Seeder
             [
                 'name' => 'LittleNest Admin',
                 'phone' => '01700000000',
-                'password' => Hash::make('password123'),
+                'password' => Hash::make('12345678'),
                 'role' => 'admin',
                 'status' => 'active',
             ]

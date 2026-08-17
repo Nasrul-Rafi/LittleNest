@@ -70,7 +70,10 @@ class BookingController extends Controller
             ->orderBy('full_name')
             ->get();
 
-        $timeSlots = TimeSlot::with('service')
+        $selectedServiceId = $request->integer('service_id');
+        $selectedSlotId = $request->integer('slot_id');
+
+        $timeSlotQuery = TimeSlot::with('service')
             ->withCount([
                 'bookings as active_bookings_count' => function ($query) {
                     $query->whereIn('status', ['pending', 'confirmed']);
@@ -80,7 +83,13 @@ class BookingController extends Controller
             ->whereDate('slot_date', '>=', today())
             ->whereHas('service', function ($query) {
                 $query->where('status', 'active');
-            })
+            });
+
+        if ($selectedServiceId > 0) {
+            $timeSlotQuery->where('service_id', $selectedServiceId);
+        }
+
+        $timeSlots = $timeSlotQuery
             ->orderBy('slot_date')
             ->orderBy('start_time')
             ->get()
@@ -89,9 +98,18 @@ class BookingController extends Controller
             })
             ->values();
 
+        if (!$timeSlots->contains('slot_id', $selectedSlotId)) {
+            $selectedSlotId = 0;
+        }
+
         return view(
             'bookings.create',
-            compact('children', 'timeSlots')
+            compact(
+                'children',
+                'timeSlots',
+                'selectedServiceId',
+                'selectedSlotId'
+            )
         );
     }
 

@@ -76,7 +76,7 @@
                                 <td>{{ $payment->booking->child->parentProfile->user->name }}</td>
                                 <td>{{ $payment->booking->child->full_name }}</td>
                                 <td>৳{{ number_format((float) $payment->amount, 2) }}</td>
-                                <td>{{ ucwords(str_replace('-', ' ', $payment->payment_method)) }}</td>
+                                <td>{{ $payment->display_method }}</td>
                                 <td>
                                     <span class="badge badge-{{ $payment->display_status }}">
                                         {{ $payment->display_status }}

@@ -43,6 +43,15 @@ class Payment extends Model
         );
     }
 
+    public function getDisplayMethodAttribute(): string
+    {
+        if ($this->payment_method === 'mobile-banking') {
+            return 'Mobile Banking (Demo)';
+        }
+
+        return ucwords(str_replace('-', ' ', $this->payment_method));
+    }
+
     public function getDisplayStatusAttribute(): string
     {
         if ($this->refunded_at) {

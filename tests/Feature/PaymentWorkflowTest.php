@@ -38,7 +38,7 @@ class PaymentWorkflowTest extends TestCase
         string $status = 'confirmed'
     ): Booking {
         $service = Service::create([
-            'name' => 'Payment Test Service',
+            'name' => 'Payment Test Service ' . uniqid(),
             'price' => 1500,
             'duration_minutes' => 120,
             'status' => 'active',
@@ -55,8 +55,8 @@ class PaymentWorkflowTest extends TestCase
 
     private function createPayment(
         Booking $booking,
-        string $status = 'pending',
-        ?string $transactionId = 'TXN-1001'
+        string $status = 'paid',
+        ?string $transactionId = 'SIM-EXISTING-001'
     ): Payment {
         return $booking->payments()->create([
             'amount' => $booking->total_amount,
@@ -67,7 +67,7 @@ class PaymentWorkflowTest extends TestCase
         ]);
     }
 
-    public function test_parent_can_submit_payment_for_confirmed_booking(): void
+    public function test_parent_can_complete_simulated_payment_for_confirmed_booking(): void
     {
         [$parent, $child] = $this->createParentAndChild();
         $booking = $this->createBooking($child);
@@ -76,38 +76,55 @@ class PaymentWorkflowTest extends TestCase
             ->actingAs($parent)
             ->post(route('payments.store', $booking), [
                 'payment_method' => 'mobile-banking',
-                'transaction_id' => 'TXN-PARENT-001',
+                'mobile_number' => '01711000000',
+                'demo_confirmation' => '1',
                 'amount' => 1,
-                'payment_status' => 'paid',
+                'payment_status' => 'failed',
             ]);
 
         $payment = Payment::first();
 
         $this->assertNotNull($payment);
-        $response->assertRedirect(
-            route('payments.show', $payment)
-        );
+        $response->assertRedirect(route('payments.show', $payment));
+        $response->assertSessionHas('success');
 
-        $this->assertDatabaseHas('payments', [
-            'booking_id' => $booking->booking_id,
-            'amount' => 1500,
-            'payment_method' => 'mobile-banking',
-            'transaction_id' => 'TXN-PARENT-001',
-            'payment_status' => 'pending',
-        ]);
+        $this->assertSame('1500.00', $payment->amount);
+        $this->assertSame('mobile-banking', $payment->payment_method);
+        $this->assertSame('paid', $payment->payment_status);
+        $this->assertNotNull($payment->paid_at);
+        $this->assertSame(
+            'SIM-LN-' . str_pad((string) $payment->payment_id, 6, '0', STR_PAD_LEFT),
+            $payment->transaction_id
+        );
     }
 
-    public function test_transaction_id_is_required_for_non_cash_payment(): void
+    public function test_simulated_payment_requires_valid_mobile_number(): void
     {
         [$parent, $child] = $this->createParentAndChild();
         $booking = $this->createBooking($child);
 
         $this->actingAs($parent)
             ->post(route('payments.store', $booking), [
-                'payment_method' => 'card',
-                'transaction_id' => '',
+                'payment_method' => 'mobile-banking',
+                'mobile_number' => '12345',
+                'demo_confirmation' => '1',
             ])
-            ->assertSessionHasErrors('transaction_id');
+            ->assertSessionHasErrors('mobile_number');
+
+        $this->assertDatabaseCount('payments', 0);
+    }
+
+    public function test_simulated_payment_requires_demo_confirmation(): void
+    {
+        [$parent, $child] = $this->createParentAndChild();
+        $booking = $this->createBooking($child);
+
+        $this->actingAs($parent)
+            ->post(route('payments.store', $booking), [
+                'payment_method' => 'mobile-banking',
+                'mobile_number' => '01711000000',
+            ])
+            ->assertSessionHasErrors('demo_confirmation');
 
         $this->assertDatabaseCount('payments', 0);
     }
@@ -119,7 +136,9 @@ class PaymentWorkflowTest extends TestCase
 
         $this->actingAs($parent)
             ->post(route('payments.store', $booking), [
-                'payment_method' => 'cash',
+                'payment_method' => 'mobile-banking',
+                'mobile_number' => '01711000000',
+                'demo_confirmation' => '1',
             ])
             ->assertSessionHas('error');
 
@@ -134,14 +153,16 @@ class PaymentWorkflowTest extends TestCase
 
         $this->actingAs($firstParent)
             ->post(route('payments.store', $booking), [
-                'payment_method' => 'cash',
+                'payment_method' => 'mobile-banking',
+                'mobile_number' => '01711000000',
+                'demo_confirmation' => '1',
             ])
             ->assertForbidden();
 
         $this->assertDatabaseCount('payments', 0);
     }
 
-    public function test_duplicate_pending_payment_is_not_created(): void
+    public function test_duplicate_active_payment_is_not_created(): void
     {
         [$parent, $child] = $this->createParentAndChild();
         $booking = $this->createBooking($child);
@@ -149,7 +170,9 @@ class PaymentWorkflowTest extends TestCase
 
         $this->actingAs($parent)
             ->post(route('payments.store', $booking), [
-                'payment_method' => 'cash',
+                'payment_method' => 'mobile-banking',
+                'mobile_number' => '01711000000',
+                'demo_confirmation' => '1',
             ])
             ->assertSessionHas('error');
 
@@ -164,7 +187,11 @@ class PaymentWorkflowTest extends TestCase
 
         [, $child] = $this->createParentAndChild();
         $booking = $this->createBooking($child);
-        $payment = $this->createPayment($booking);
+        $payment = $this->createPayment(
+            $booking,
+            'pending',
+            'SIM-PENDING-001'
+        );
 
         $response = $this
             ->actingAs($admin)
@@ -193,22 +220,22 @@ class PaymentWorkflowTest extends TestCase
     {
         [$parent, $child] = $this->createParentAndChild();
         $booking = $this->createBooking($child);
-        $this->createPayment($booking, 'failed', 'FAILED-TXN-001');
+        $this->createPayment($booking, 'failed', 'SIM-FAILED-001');
 
         $this->actingAs($parent)
             ->post(route('payments.store', $booking), [
                 'payment_method' => 'mobile-banking',
-                'transaction_id' => 'RETRY-TXN-002',
+                'mobile_number' => '01711000000',
+                'demo_confirmation' => '1',
             ])
             ->assertSessionHas('success');
 
         $this->assertDatabaseCount('payments', 2);
 
-        $this->assertDatabaseHas('payments', [
-            'booking_id' => $booking->booking_id,
-            'transaction_id' => 'RETRY-TXN-002',
-            'payment_status' => 'pending',
-        ]);
+        $latestPayment = Payment::latest('payment_id')->first();
+
+        $this->assertSame('paid', $latestPayment->payment_status);
+        $this->assertStringStartsWith('SIM-LN-', $latestPayment->transaction_id);
     }
 
     public function test_parent_sees_payment_history(): void
@@ -219,28 +246,42 @@ class PaymentWorkflowTest extends TestCase
         $this->createPayment(
             $booking,
             'failed',
-            'FAILED-HISTORY-001'
-        );
-
-        $this->createPayment(
-            $booking,
-            'pending',
-            'PENDING-HISTORY-002'
+            'SIM-FAILED-HISTORY-001'
         );
 
         $this->actingAs($parent)
             ->get(route('bookings.show', $booking))
             ->assertOk()
             ->assertSee('Payment Information')
-            ->assertSee('FAILED-HISTORY-001')
-            ->assertSee('PENDING-HISTORY-002');
+            ->assertSee('SIM-FAILED-HISTORY-001');
+    }
+
+    public function test_parent_can_view_receipt_after_simulated_payment(): void
+    {
+        [$parent, $child] = $this->createParentAndChild();
+        $booking = $this->createBooking($child);
+
+        $this->actingAs($parent)
+            ->post(route('payments.store', $booking), [
+                'payment_method' => 'mobile-banking',
+                'mobile_number' => '01711000000',
+                'demo_confirmation' => '1',
+            ]);
+
+        $payment = Payment::first();
+
+        $this->actingAs($parent)
+            ->get(route('payments.receipt', $payment))
+            ->assertOk()
+            ->assertSee('Payment Receipt')
+            ->assertSee('Mobile Banking (Demo)');
     }
 
     public function test_paid_booking_cannot_be_cancelled_directly(): void
     {
         [$parent, $child] = $this->createParentAndChild();
         $booking = $this->createBooking($child);
-        $this->createPayment($booking, 'paid');
+        $this->createPayment($booking);
 
         $this->actingAs($parent)
             ->patch(route('bookings.cancel', $booking))

@@ -76,7 +76,7 @@
             <h1>Parent Dashboard</h1>
             <p>Manage your family’s care journey in one place.</p>
         </div>
-        <a class="button" href="{{ route('bookings.create') }}">Book a Service</a>
+        <a class="button" href="{{ route('parent.services.index') }}">Book a Service</a>
     </div>
 
     <div class="dashboard-grid">
@@ -131,7 +131,7 @@
                 <a class="button button-secondary" href="{{ route('bookings.show', $booking) }}">View Booking</a>
             @else
                 <p class="muted">No upcoming booking yet.</p>
-                <a class="button" href="{{ route('bookings.create') }}">Create Booking</a>
+                <a class="button" href="{{ route('parent.services.index') }}">Browse Services</a>
             @endif
         </section>
 

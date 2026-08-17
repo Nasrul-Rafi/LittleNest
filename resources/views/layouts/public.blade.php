@@ -104,7 +104,7 @@
     <footer>
         <div class="shell footer-grid">
             <div><strong>LittleNest</strong><br><span>Safe care, clear communication and trusted support.</span></div>
-            <div>Dhanmondi, Dhaka<br>hello@littlenest.example<br>+880 1700 000000</div>
+            <div>Dhanmondi, Dhaka<br>littlenest@gmail.com<br>+880 1700 000000</div>
         </div>
     </footer>
 </body>

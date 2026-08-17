@@ -269,7 +269,7 @@
                                 <td>#{{ $payment->payment_id }}</td>
                                 <td>৳{{ number_format((float) $payment->amount, 2) }}</td>
                                 <td>
-                                    {{ ucwords(str_replace('-', ' ', $payment->payment_method)) }}
+                                    {{ $payment->display_method }}
                                 </td>
                                 <td>{{ $payment->transaction_id ?: 'Not required' }}</td>
                                 <td>

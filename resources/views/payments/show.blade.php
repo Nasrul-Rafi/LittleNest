@@ -51,7 +51,7 @@
             <div class="detail-item">
                 <span class="detail-label">Payment Method</span>
                 <p class="detail-value">
-                    {{ ucwords(str_replace('-', ' ', $payment->payment_method)) }}
+                    {{ $payment->display_method }}
                 </p>
             </div>
 

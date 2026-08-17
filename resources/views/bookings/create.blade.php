@@ -9,9 +9,9 @@
 
         <a
             class="button button-secondary"
-            href="{{ route('bookings.index') }}"
+            href="{{ route('parent.services.index') }}"
         >
-            Back to Bookings
+            Back to Services
         </a>
     </div>
 
@@ -34,8 +34,12 @@
 
                 <p>
                     No service slot currently has available capacity.
-                    Please try again later.
+                    Please choose another service or check again later.
                 </p>
+
+                <a class="button" href="{{ route('parent.services.index') }}">
+                    View Services
+                </a>
             </div>
         @else
             <form
@@ -87,7 +91,7 @@
                             @foreach ($timeSlots as $timeSlot)
                                 <option
                                     value="{{ $timeSlot->slot_id }}"
-                                    @selected(old('slot_id') == $timeSlot->slot_id)
+                                    @selected((int) old('slot_id', $selectedSlotId) === $timeSlot->slot_id)
                                 >
                                     {{ $timeSlot->service->name }}
                                     — {{ $timeSlot->slot_date->format('d M Y') }}
@@ -126,7 +130,7 @@
 
                     <a
                         class="button button-secondary"
-                        href="{{ route('bookings.index') }}"
+                        href="{{ route('parent.services.index') }}"
                     >
                         Cancel
                     </a>

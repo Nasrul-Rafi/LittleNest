@@ -2,8 +2,8 @@
 @section('content')
 <section class="hero">
     <div>
-        <div class="eyebrow">Trusted child care, made clearer</div>
-        <h1>Safe care. Happy children. Peace of mind.</h1>
+        <div class="eyebrow">Trusted child care</div>
+        <h1>Happy Kids <br>Happy Life</h1>
         <p class="lead">Flexible child-care services with transparent booking, assigned caregivers and timestamped activity updates that keep parents informed.</p>
         <div class="actions">
             <a class="btn btn-primary" href="{{ route('public.services') }}">Explore Services</a>

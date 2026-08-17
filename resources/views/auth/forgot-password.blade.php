@@ -6,8 +6,16 @@
     <h2>Reset your password</h2>
     <p class="muted">
         Enter the email address connected to your LittleNest account.
-        We will send you a secure reset link.
     </p>
+
+    @if (session('local_reset_url'))
+        <div class="alert success" style="margin-top:18px;">
+            Your local reset link is ready.
+            <div style="margin-top:10px;">
+                <a class="btn btn-primary" href="{{ session('local_reset_url') }}">Open Reset Page</a>
+            </div>
+        </div>
+    @endif
 
     <form method="POST" action="{{ route('password.email') }}">
         @csrf

@@ -569,6 +569,7 @@
 
                 @if (auth()->user()->role === 'parent')
                     <a href="{{ route('children.index') }}" class="{{ request()->routeIs('children.*') ? 'active' : '' }}">My Children</a>
+                    <a href="{{ route('parent.services.index') }}" class="{{ request()->routeIs('parent.services.*') ? 'active' : '' }}">Services</a>
                     <a href="{{ route('bookings.create') }}" class="{{ request()->routeIs('bookings.create') ? 'active' : '' }}">Book a Service</a>
                     <a href="{{ route('bookings.index') }}" class="{{ request()->routeIs('bookings.*', 'booking-requests.*') ? 'active' : '' }}">My Bookings</a>
                     <a href="{{ route('activities.index') }}" class="{{ request()->routeIs('activities.*') ? 'active' : '' }}">Child Activities</a>

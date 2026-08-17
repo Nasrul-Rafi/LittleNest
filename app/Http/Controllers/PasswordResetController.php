@@ -24,6 +24,26 @@ class PasswordResetController extends Controller
             'email' => ['required', 'email'],
         ]);
 
+        if (app()->environment('local') && config('mail.default') === 'log') {
+            $user = User::where('email', $request->input('email'))->first();
+
+            if (!$user) {
+                return back()->withErrors([
+                    'email' => 'We could not find an account with that email address.',
+                ]);
+            }
+
+            $token = Password::createToken($user);
+            $resetUrl = route('password.reset', [
+                'token' => $token,
+                'email' => $user->email,
+            ]);
+
+            return back()
+                ->with('success', 'Password reset link created for local development.')
+                ->with('local_reset_url', $resetUrl);
+        }
+
         $status = Password::sendResetLink(
             $request->only('email')
         );

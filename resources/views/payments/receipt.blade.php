@@ -42,7 +42,7 @@
             <div class="item"><span class="label">Child</span><span class="value">{{ $payment->booking->child->full_name }}</span></div>
             <div class="item"><span class="label">Service</span><span class="value">{{ $payment->booking->service->name }}</span></div>
             <div class="item"><span class="label">Amount</span><span class="value">৳{{ number_format((float) $payment->amount, 2) }}</span></div>
-            <div class="item"><span class="label">Method</span><span class="value">{{ ucwords(str_replace('-', ' ', $payment->payment_method)) }}</span></div>
+            <div class="item"><span class="label">Method</span><span class="value">{{ $payment->display_method }}</span></div>
             <div class="item"><span class="label">Transaction ID</span><span class="value">{{ $payment->transaction_id ?: 'Not required' }}</span></div>
             <div class="item"><span class="label">Paid At</span><span class="value">{{ $payment->paid_at?->format('d M Y, h:i A') ?? 'Not available' }}</span></div>
         </div>
