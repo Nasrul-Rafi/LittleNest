@@ -17,6 +17,13 @@
                 </a>
             @endif
 
+            @if ($payment->gateway_name === 'sslcommerz' && $payment->payment_status === 'pending')
+                <form method="POST" action="{{ route('payments.check-status', $payment) }}">
+                    @csrf
+                    <button class="button" type="submit">Check Payment Status</button>
+                </form>
+            @endif
+
             <a
                 class="button button-secondary"
                 href="{{ route('bookings.show', $payment->booking) }}"
@@ -60,6 +67,23 @@
                 <p class="detail-value">{{ $payment->transaction_id ?: 'Not required' }}</p>
             </div>
 
+            @if ($payment->gateway_name === 'sslcommerz')
+                <div class="detail-item">
+                    <span class="detail-label">Gateway Status</span>
+                    <p class="detail-value">{{ $payment->gateway_status ?: 'Pending' }}</p>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">Bank Transaction ID</span>
+                    <p class="detail-value">{{ $payment->bank_transaction_id ?: 'Not available yet' }}</p>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">Payment Channel</span>
+                    <p class="detail-value">{{ $payment->card_type ?: 'Selected at SSLCOMMERZ' }}</p>
+                </div>
+            @endif
+
             <div class="detail-item">
                 <span class="detail-label">Status</span>
                 <p class="detail-value">
@@ -82,6 +106,18 @@
                         : 'Not paid yet' }}
                 </p>
             </div>
+
+            @if ($payment->refund_reference)
+                <div class="detail-item">
+                    <span class="detail-label">Refund Reference</span>
+                    <p class="detail-value">{{ $payment->refund_reference }}</p>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">Refund Status</span>
+                    <p class="detail-value">{{ $payment->refund_gateway_status ?: 'processing' }}</p>
+                </div>
+            @endif
 
             @if ($payment->isRefunded())
                 <div class="detail-item">

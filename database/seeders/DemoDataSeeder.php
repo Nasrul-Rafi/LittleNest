@@ -575,7 +575,7 @@ class DemoDataSeeder extends Seeder
             $method = $index % 4 === 0 ? 'cash' : ($index % 2 === 0 ? 'card' : 'mobile-banking');
             $transactionId = $method === 'cash'
                 ? null
-                : 'SIM-LN-DEMO-' . str_pad((string) $transactionNumber++, 5, '0', STR_PAD_LEFT);
+                : 'SEED-LN-' . str_pad((string) $transactionNumber++, 5, '0', STR_PAD_LEFT);
 
             $paidAt = $booking->booking_date->copy()->setTime(18, 0);
             $payment = Payment::updateOrCreate(
@@ -600,7 +600,7 @@ class DemoDataSeeder extends Seeder
                 $method = $index === 0 ? 'cash' : 'mobile-banking';
                 $transactionId = $method === 'cash'
                     ? null
-                    : 'SIM-LN-DEMO-' . str_pad((string) $transactionNumber++, 5, '0', STR_PAD_LEFT);
+                    : 'SEED-LN-' . str_pad((string) $transactionNumber++, 5, '0', STR_PAD_LEFT);
 
                 $paidAt = now()->subDay();
                 $payment = Payment::updateOrCreate(
@@ -624,7 +624,7 @@ class DemoDataSeeder extends Seeder
                     [
                         'amount' => $booking->total_amount,
                         'payment_method' => 'mobile-banking',
-                        'transaction_id' => 'SIM-LN-DEMO-' . str_pad((string) $transactionNumber++, 5, '0', STR_PAD_LEFT),
+                        'transaction_id' => 'SEED-LN-' . str_pad((string) $transactionNumber++, 5, '0', STR_PAD_LEFT),
                         'payment_status' => 'pending',
                         'paid_at' => null,
                         'refund_amount' => null,
@@ -640,7 +640,7 @@ class DemoDataSeeder extends Seeder
                     [
                         'amount' => $booking->total_amount,
                         'payment_method' => 'card',
-                        'transaction_id' => 'SIM-LN-DEMO-' . str_pad((string) $transactionNumber++, 5, '0', STR_PAD_LEFT),
+                        'transaction_id' => 'SEED-LN-' . str_pad((string) $transactionNumber++, 5, '0', STR_PAD_LEFT),
                         'payment_status' => 'failed',
                         'paid_at' => null,
                         'refund_amount' => null,
@@ -661,7 +661,7 @@ class DemoDataSeeder extends Seeder
                 [
                     'amount' => $booking->total_amount,
                     'payment_method' => 'mobile-banking',
-                    'transaction_id' => 'SIM-LN-DEMO-' . str_pad((string) $transactionNumber++, 5, '0', STR_PAD_LEFT),
+                    'transaction_id' => 'SEED-LN-' . str_pad((string) $transactionNumber++, 5, '0', STR_PAD_LEFT),
                     'payment_status' => 'paid',
                     'paid_at' => $paidAt,
                     'refund_amount' => $booking->total_amount,

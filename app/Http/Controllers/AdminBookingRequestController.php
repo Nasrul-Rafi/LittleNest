@@ -90,6 +90,15 @@ class AdminBookingRequestController extends Controller
                     ->get();
 
                 foreach ($paidPayments as $payment) {
+                    if ($payment->gateway_name === 'sslcommerz') {
+                        $payment->update([
+                            'refund_note' =>
+                                'Cancellation approved. Process the refund through SSLCOMMERZ from Admin Payments.',
+                        ]);
+
+                        continue;
+                    }
+
                     $payment->update([
                         'refund_amount' => $payment->amount,
                         'refunded_at' => now(),
@@ -110,7 +119,7 @@ class AdminBookingRequestController extends Controller
                 ->route('admin.booking-requests.show', $bookingRequest)
                 ->with(
                     'success',
-                    'Cancellation approved. Any paid payment was recorded as refunded.'
+                    'Cancellation approved. Legacy payments were refunded automatically. SSLCOMMERZ payments can now be refunded from Admin Payments.'
                 );
         }
 

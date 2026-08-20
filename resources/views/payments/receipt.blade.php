@@ -44,6 +44,10 @@
             <div class="item"><span class="label">Amount</span><span class="value">৳{{ number_format((float) $payment->amount, 2) }}</span></div>
             <div class="item"><span class="label">Method</span><span class="value">{{ $payment->display_method }}</span></div>
             <div class="item"><span class="label">Transaction ID</span><span class="value">{{ $payment->transaction_id ?: 'Not required' }}</span></div>
+            @if ($payment->gateway_name === 'sslcommerz')
+                <div class="item"><span class="label">Bank Transaction ID</span><span class="value">{{ $payment->bank_transaction_id ?: 'Not available' }}</span></div>
+                <div class="item"><span class="label">Payment Channel</span><span class="value">{{ $payment->card_type ?: 'SSLCOMMERZ' }}</span></div>
+            @endif
             <div class="item"><span class="label">Paid At</span><span class="value">{{ $payment->paid_at?->format('d M Y, h:i A') ?? 'Not available' }}</span></div>
         </div>
 

@@ -38,6 +38,15 @@ Route::get('/about', [PublicPageController::class, 'about'])->name('about');
 Route::get('/contact', [PublicPageController::class, 'contact'])->name('contact');
 Route::post('/contact', [PublicPageController::class, 'sendContact'])->name('contact.store');
 
+Route::match(['get', 'post'], '/payments/sslcommerz/success', [PaymentController::class, 'sslSuccess'])
+    ->name('sslcommerz.success');
+Route::match(['get', 'post'], '/payments/sslcommerz/fail', [PaymentController::class, 'sslFail'])
+    ->name('sslcommerz.fail');
+Route::match(['get', 'post'], '/payments/sslcommerz/cancel', [PaymentController::class, 'sslCancel'])
+    ->name('sslcommerz.cancel');
+Route::post('/payments/sslcommerz/ipn', [PaymentController::class, 'sslIpn'])
+    ->name('sslcommerz.ipn');
+
 Route::middleware('guest')->group(function () {
     Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
     Route::post('/register', [AuthController::class, 'register'])->name('register.store');
@@ -151,6 +160,8 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
         ->name('admin.payments.mark-failed');
     Route::post('/admin/payments/{payment}/refund', [AdminPaymentController::class, 'refund'])
         ->name('admin.payments.refund');
+    Route::post('/admin/payments/{payment}/refund-status', [AdminPaymentController::class, 'checkRefundStatus'])
+        ->name('admin.payments.refund-status');
 
     Route::get('/admin/services', [AdminServiceController::class, 'index'])
         ->name('admin.services.index');
@@ -229,6 +240,8 @@ Route::middleware(['auth', 'role:parent'])->group(function () {
         ->name('payments.create');
     Route::post('/bookings/{booking}/payment', [PaymentController::class, 'store'])
         ->name('payments.store');
+    Route::post('/payments/{payment}/check-status', [PaymentController::class, 'checkStatus'])
+        ->name('payments.check-status');
     Route::get('/payments/{payment}', [PaymentController::class, 'show'])
         ->name('payments.show');
     Route::get('/payments/{payment}/receipt', [PaymentController::class, 'receipt'])

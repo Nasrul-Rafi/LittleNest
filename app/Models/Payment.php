@@ -16,12 +16,20 @@ class Payment extends Model
         'booking_id',
         'amount',
         'payment_method',
+        'gateway_name',
+        'gateway_status',
+        'gateway_session_key',
+        'validation_id',
+        'bank_transaction_id',
+        'card_type',
         'transaction_id',
         'payment_status',
         'paid_at',
         'refund_amount',
         'refunded_at',
         'refund_note',
+        'refund_reference',
+        'refund_gateway_status',
     ];
 
     protected function casts(): array
@@ -45,8 +53,10 @@ class Payment extends Model
 
     public function getDisplayMethodAttribute(): string
     {
-        if ($this->payment_method === 'mobile-banking') {
-            return 'Mobile Banking (Demo)';
+        if ($this->gateway_name === 'sslcommerz') {
+            return config('sslcommerz.sandbox')
+                ? 'SSLCOMMERZ Sandbox'
+                : 'SSLCOMMERZ';
         }
 
         return ucwords(str_replace('-', ' ', $this->payment_method));

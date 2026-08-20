@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Payment;
+use App\Services\SslCommerzService;
 use Illuminate\Http\Request;
+use Throwable;
 
 class AdminPaymentController extends Controller
 {
@@ -86,6 +88,13 @@ class AdminPaymentController extends Controller
     {
         $this->ensureAdmin($request);
 
+        if ($payment->gateway_name === 'sslcommerz') {
+            return back()->with(
+                'error',
+                'SSLCOMMERZ payments must be confirmed by gateway validation.'
+            );
+        }
+
         if ($payment->payment_status !== 'pending') {
             return back()->with(
                 'error',
@@ -113,6 +122,13 @@ class AdminPaymentController extends Controller
     {
         $this->ensureAdmin($request);
 
+        if ($payment->gateway_name === 'sslcommerz') {
+            return back()->with(
+                'error',
+                'SSLCOMMERZ payment status is controlled by the gateway.'
+            );
+        }
+
         if ($payment->payment_status !== 'pending') {
             return back()->with(
                 'error',
@@ -129,8 +145,11 @@ class AdminPaymentController extends Controller
             ->with('success', 'Payment marked as failed.');
     }
 
-    public function refund(Request $request, Payment $payment)
-    {
+    public function refund(
+        Request $request,
+        Payment $payment,
+        SslCommerzService $sslCommerz
+    ) {
         $this->ensureAdmin($request);
 
         $validated = $request->validate([
@@ -158,6 +177,52 @@ class AdminPaymentController extends Controller
             );
         }
 
+        if ($payment->gateway_name === 'sslcommerz') {
+            if ($payment->refund_reference) {
+                return back()->with(
+                    'error',
+                    'A refund request has already been sent to SSLCOMMERZ.'
+                );
+            }
+
+            try {
+                $data = $sslCommerz->initiateRefund(
+                    $payment,
+                    $validated['refund_note']
+                );
+            } catch (Throwable $exception) {
+                return back()->with('error', $exception->getMessage());
+            }
+
+            $status = strtolower((string) ($data['status'] ?? 'failed'));
+            $refundReference = $data['refund_ref_id'] ?? null;
+
+            if (
+                ($data['APIConnect'] ?? null) !== 'DONE'
+                || !in_array($status, ['success', 'processing'], true)
+                || !$refundReference
+            ) {
+                return back()->with(
+                    'error',
+                    (string) ($data['errorReason'] ?? 'SSLCOMMERZ did not accept the refund request.')
+                );
+            }
+
+            $payment->update([
+                'refund_amount' => $payment->amount,
+                'refund_note' => $validated['refund_note'],
+                'refund_reference' => $refundReference,
+                'refund_gateway_status' => $status,
+            ]);
+
+            return redirect()
+                ->route('admin.payments.show', $payment)
+                ->with(
+                    'success',
+                    'Refund request sent to SSLCOMMERZ. Use Check Refund Status until the sandbox confirms it.'
+                );
+        }
+
         $payment->update([
             'refund_amount' => $payment->amount,
             'refunded_at' => now(),
@@ -167,6 +232,48 @@ class AdminPaymentController extends Controller
         return redirect()
             ->route('admin.payments.show', $payment)
             ->with('success', 'Payment refund recorded successfully.');
+    }
+
+    public function checkRefundStatus(
+        Request $request,
+        Payment $payment,
+        SslCommerzService $sslCommerz
+    ) {
+        $this->ensureAdmin($request);
+
+        if (
+            $payment->gateway_name !== 'sslcommerz'
+            || !$payment->refund_reference
+        ) {
+            return back()->with('error', 'No SSLCOMMERZ refund request is available for this payment.');
+        }
+
+        try {
+            $data = $sslCommerz->queryRefund($payment->refund_reference);
+        } catch (Throwable $exception) {
+            return back()->with('error', $exception->getMessage());
+        }
+
+        $status = strtolower((string) ($data['status'] ?? 'unknown'));
+
+        $update = [
+            'refund_gateway_status' => $status,
+        ];
+
+        if ($status === 'refunded') {
+            $update['refunded_at'] = now();
+        }
+
+        $payment->update($update);
+
+        if ($status === 'refunded') {
+            return back()->with('success', 'SSLCOMMERZ confirmed the refund successfully.');
+        }
+
+        return back()->with(
+            'success',
+            'Current SSLCOMMERZ refund status: ' . $status . '.'
+        );
     }
 
     private function ensureAdmin(Request $request): void

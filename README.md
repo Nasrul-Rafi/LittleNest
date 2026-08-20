@@ -33,7 +33,7 @@ Parents can:
 - Follow child activity updates
 - View activity details
 - Export child activity summaries
-- Make simulated payments
+- Pay confirmed bookings through the SSLCOMMERZ sandbox gateway
 - View receipts and payment history
 - Export payment history
 
@@ -257,19 +257,28 @@ Admin can also monitor child activities using the available filters.
 
 ## Payments and Refunds
 
-LittleNest includes a simulated payment system for project demonstration.
+LittleNest uses the SSLCOMMERZ sandbox gateway for payment testing.
 
-Payment records can include:
+Add the sandbox Store ID and Store Password to the local `.env` file:
 
-- Pending payments
-- Paid payments
-- Failed payments
+```env
+SSLCOMMERZ_SANDBOX=true
+SSLCOMMERZ_BASE_URL=https://sandbox.sslcommerz.com
+SSLCOMMERZ_STORE_ID=your_store_id
+SSLCOMMERZ_STORE_PASSWORD=your_store_password
+```
 
-The system also supports refund information for eligible cancelled bookings.
+After changing `.env`, run:
 
-Parents can view their payment history and receipts.
+```bat
+php artisan optimize:clear
+```
 
-Admin can manage payments and refunds.
+Parents can start payment only for Confirmed bookings. LittleNest creates a Pending payment, sends the booking amount to SSLCOMMERZ, redirects the Parent to the hosted sandbox checkout page, and validates the returned transaction before marking the payment as Paid.
+
+Payment records can include Pending, Paid, and Failed states. Paid payments can generate receipts. For SSLCOMMERZ payments, eligible cancelled bookings can send a refund request to the sandbox gateway and the Admin can check the refund status from the payment details page.
+
+SSLCOMMERZ credentials must stay in `.env` and must not be committed to GitHub.
 
 ## Booking Requests
 
